@@ -1,16 +1,19 @@
-# FECAP - Fundação de Comércio Álvares Penteado
+# Projeto Interdisciplinar (IoT e Robótica) - 🫂 NockHug
+---
+
+## 🏫 FECAP - Fundação de Comércio Álvares Penteado
 
 <p align="center">
-<a href= "https://www.fecap.br/"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRhZPrRa89Kma0ZZogxm0pi-tCn_TLKeHGVxywp-LXAFGR3B1DPouAJYHgKZGV0XTEf4AE&usqp=CAU" alt="FECAP - Fundação de Comércio Álvares Penteado" border="0"></a>
+<a href= "https://www.fecap.br/"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRhZPrRa89Kma0ZZogxm0pi-tCn_TLKeHGVxywp-LXAFGR3B1DPouAJYHgKZGV0XTEf4AE&usqp=CAU" alt="FECAP - Fundação de Comércio Álvares Penteado" border="25.0px"></a>
 </p>
 
-# Projeto Interdisciplinar - IoT e Robótica
+---
 
-## NockHug
+## 👨‍💻 Integrantes: [André dos Santos](https://www.linkedin.com/in/andr%C3%A9-dos-santos-greg%C3%B3rio-025a402ba/), [Guilherme Fogolin](https://www.linkedin.com/in/guilhermefogolin/), [Pedro Lemos](https://www.linkedin.com/in/pedrohnlemos/) e [Yan Cezareto](https://www.linkedin.com/in/yan-cezareto-792ba22b8/)
 
-## Integrantes: <a href="https://www.linkedin.com/in/pedrohnlemos/">Pedro Lemos</a>, <a href="https://www.linkedin.com/in/yan-cezareto-792ba22b8/">Yan Cezareto</a>, <a href="https://www.linkedin.com/in/guilhermefogolin/">Guilherme Fogolin</a>, <a href="https://www.linkedin.com/in/andré-dos-santos-gregório-025a402ba/">André Gregório</a>
+## 👨‍🏫 Professores orientadores: [Edson Barbero](https://www.linkedin.com/in/edsonbarbero/), [João Trencher](https://www.linkedin.com/in/trencher/), [Kátia Bossi](https://www.linkedin.com/in/katia-bossi/), [Rodnil Lisboa](https://www.linkedin.com/in/professorrodnil/) e [Victor Rosetti](https://www.linkedin.com/in/victorbarq/)
 
-## Professores Orientadores: <a href="https://www.linkedin.com/in/edsonbarbero/">Edson Ricardo Barbero</a>, <a href="https://www.linkedin.com/in/trencher/">João Trencher</a>, <a href="https://www.linkedin.com/in/katia-bossi/">Katia Milani Lara Bossi</a>, <a href="https://www.linkedin.com/in/professorrodnil/">Rodnil da Silva Moreira Lisboa</a>, <a href="https://www.linkedin.com/in/victorbarq/">Victor Bruno Alexander Rosetti de Quiroz</a>,
+---
 
 ## Descrição
 
