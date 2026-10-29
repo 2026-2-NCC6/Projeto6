@@ -1,0 +1,90 @@
+{
+  "expo": {
+    "name": "NockHug",
+    "slug": "nockhug",
+    "scheme": "nockhug",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "br.edu.fecap.nockhug",
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSLocalNetworkUsageDescription": "O NockHug usa a rede local para falar com a lançadora pelo Wi-Fi dela.",
+        "NSAppTransportSecurity": {
+          "NSAllowsLocalNetworking": true,
+          "NSExceptionDomains": {
+            "192.168.4.1": {
+              "NSExceptionAllowsInsecureHTTPLoads": true,
+              "NSIncludesSubdomains": false
+            }
+          }
+        },
+        "CADisableMinimumFrameDurationOnPhone": true
+      },
+      "appleTeamId": "96NVTU77NR"
+    },
+    "android": {
+      "package": "br.edu.fecap.nockhug",
+      "adaptiveIcon": {
+        "backgroundColor": "#03372D",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "plugins": [
+      "expo-router",
+      "expo-sqlite",
+      "expo-secure-store",
+      "expo-font",
+      "expo-sharing",
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "O NockHug ouve o microfone para reconhecer a palavra de ativação e os comandos da lançadora. O áudio não é gravado.",
+          "speechRecognitionPermission": "O NockHug transforma sua voz em texto para entender os comandos da lançadora."
+        }
+      ],
+      [
+        "react-native-ble-plx",
+        {
+          "isBackgroundEnabled": false,
+          "neverForLocation": true,
+          "bluetoothAlwaysPermission": "O NockHug usa o Bluetooth para conectar à lançadora sem trocar de rede Wi-Fi."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O NockHug usa a foto escolhida só como foto do seu perfil, guardada neste celular."
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0A1607",
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 180,
+          "dark": {
+            "backgroundColor": "#0A1607",
+            "image": "./assets/splash-icon.png"
+          }
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
