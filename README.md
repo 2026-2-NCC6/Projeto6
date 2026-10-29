@@ -18,98 +18,127 @@
 ## Descrição
 
 <p align="center">
-<img src="https://pix4free.org/assets/library/2021-01-20/originals/game.jpg" alt="NOME DO JOGO" border="0">
-  Game by <a href="http://www.nyphotographic.com/">Nick Youngson</a> <a rel="license" href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a> <a href="http://pix4free.org/">Pix4free</a>
+  <img src="imagens/logo-nockhug.png" alt="Logo do NockHug: uma bola de tênis sorrindo que abraça a si mesma" width="240">
 </p>
 
+O **NockHug** é uma lançadora de bolas controlada **pela voz do praticante**, pelo celular. Quem treina com uma lançadora está em quadra, com a raquete na mão, e para pausar ou ajustar a máquina precisa largar o treino e atravessar a quadra. Com o NockHug, basta dizer a palavra de ativação seguida do comando: *"Nock, liga"*, *"Nock, pausa"*, *"Nock, retoma"*, *"desliga"*. A palavra de emergência *"Para!"* funciona a qualquer momento, sem palavra de ativação.
 
-De um a dois parágrafos sobre o que é seu projeto e o que ele faz.
-<br><br>
-Meu projeto ajuda estudantes FECAP a configurarem seus githubs.
-<br><br>
-May the force be with you!
-<br><br>
+O projeto é parte do tema **Smart Tennis Arena** (treinos gamificados de tênis com IoT, robótica e integração), em parceria com a Smart Tennis. Ele tem duas partes:
+
+- **A lançadora**: um ESP32 que comanda dois motores, a roda que arremessa a bola (14 000 RPM) e a base giratória que alimenta o cano (20 RPM). Ela recebe comandos por **Wi-Fi** (Access Point próprio) ou **Bluetooth Low Energy**, e para os motores sozinha se ficar 3 segundos sem notícias do app.
+- **O app mobile** (Android e iOS): prepara cada sessão com um checklist de segurança, reconhece a voz, conta as bolas estimadas de cada série, mantém um botão de parada de emergência sempre à mão e transforma cada treino em progresso visível (XP, níveis, sequência de dias e conquistas). Funciona sem internet e guarda tudo no próprio aparelho.
+
+A segurança vem antes de tudo: a lançadora só aceita "liga" depois que o checklist a **arma**, e parar é sempre mais fácil que ligar.
+
+## 📦 Entregas
+
+| Unidade curricular | Entrega 01 | Entrega 02 |
+|--------------------|------------|------------|
+| Projeto Interdisciplinar: IoT e Robótica | [Proposta técnica e backlog](documentos/Entrega01/PI_IoT_Robotica/Entrega01_PI_IoT_Robotica.pdf) | [Em andamento](documentos/Entrega02/PI_IoT_Robotica) |
+| Sistemas Embarcados e Robótica | [Montagem e testes do circuito](documentos/Entrega01/Sistemas_Embarcados_Robotica/Entrega01_Sistemas_Embarcados_Robotica.pdf) | [Em andamento](documentos/Entrega02/Sistemas_Embarcados_Robotica) |
+| Teoria da Computação e Linguagens Formais | [Modelagem formal do controle por voz](documentos/Entrega01/Teoria_Computacao/Entrega01_Teoria_da_Computa%C3%A7%C3%A3o.pdf) | [Em andamento](documentos/Entrega02/Teoria_Computacao) |
+| Redes de Computadores e Cibersegurança | [Relatório de vulnerabilidades](documentos/Entrega01/Redes_Ciberseguranca/Entrega01_Redes_Ciberseguranca.pdf) | [Em andamento](documentos/Entrega02/Redes_Ciberseguranca) |
+| Inovação e Empreendedorismo | [Análise da oportunidade](documentos/Entrega01/Inovacao_Empreendedorismo/Entrega01_Inova%C3%A7%C3%A3o_Empreendedorismo.pdf) | [Em andamento](documentos/Entrega02/Inovacao_Empreendedorismo) |
+
+Código-fonte por entrega:
+
+- [**Entrega 01**](src/Entrega01): firmware do ESP32 com controle por voz no navegador, senha forte no Access Point e token exigido para acionar os motores.
+- [**Entrega 02**](src/Entrega02): firmware v2 (máquina de estados com trava, Wi-Fi e Bluetooth ao mesmo tempo, watchdog e calibração) e o app mobile. O passo a passo detalhado está no [README da Entrega 02](src/Entrega02/README.md).
 
 ## 🛠 Estrutura de pastas
 
--Raiz<br>
-|<br>
-|-->documentos<br>
-  &emsp;|-->antigos<br>
-  &emsp;|Documentação.docx<br>
-|-->executáveis<br>
-  &emsp;|-->windows<br>
-  &emsp;|-->android<br>
-  &emsp;|-->HTML<br>
-|-->imagens<br>
-|-->src<br>
-  &emsp;|-->Backend<br>
-  &emsp;|-->Frontend<br>
-|readme.md<br>
+```
+Projeto6/
+├── README.md
+├── documentos/                  entregas em PDF, por entrega e por unidade curricular
+│   ├── Entrega01/
+│   └── Entrega02/
+├── imagens/                     imagens do projeto (logo)
+└── src/
+    ├── Entrega01/
+    │   ├── main.ino             firmware da Entrega 01
+    │   └── segredos.exemplo.h   modelo das credenciais da lançadora
+    └── Entrega02/
+        ├── README.md            como gravar o firmware, contrato HTTP/BLE e roteiro de testes
+        ├── main.ino             firmware v2
+        ├── segredos.exemplo.h   modelo das credenciais da lançadora
+        └── app/                 app mobile (React Native + Expo)
+```
 
-A pasta raiz contem dois arquivos que devem ser alterados:
+Estrutura do app mobile:
 
-<b>README.MD</b>: Arquivo que serve como guia e explicação geral sobre seu projeto. O mesmo que você está lendo agora.
-
-Há também 4 pastas que seguem da seguinte forma:
-
-<b>documentos</b>: Toda a documentação estará nesta pasta.
-
-<b>executáveis</b>: Binários e executáveis do projeto devem estar nesta pasta.
-
-<b>imagens</b>: Imagens do sistema
-
-<b>src</b>: Pasta que contém o código fonte.
+```
+app/
+├── app.json             configuração do Expo (nome, ícones, permissões)
+├── assets/              ícone, splash e logo
+├── DESIGN.md            sistema visual: paleta, tipografia e movimento
+└── src/
+    ├── app/             telas e navegação (Expo Router)
+    │   ├── onboarding/      primeiro acesso, em 7 passos
+    │   ├── (abas)/          Início, Treinos, Histórico e Conquistas
+    │   ├── sessao/          checklist de segurança e a sessão por voz
+    │   ├── resultado/       resultado de cada sessão
+    │   └── …                parada segura, configurações, perfil, calibração e conexão
+    ├── dominio/         regras puras e testadas: vocabulário de voz, gamificação e treinos
+    ├── lancadora/       contrato com a lançadora e os transportes Wi-Fi, Bluetooth e simulado
+    ├── voz/             reconhecimento de fala e o fluxo de comandos da sessão
+    ├── sessao/          a sessão em andamento: trava, séries, descanso e registro de comandos
+    ├── dados/           banco local (SQLite) e token guardado no cofre seguro do aparelho
+    ├── estado/          perfil, configurações e progresso em memória
+    ├── telas/           partes de tela reaproveitadas
+    └── ui/              tema claro e escuro, componentes, ícones e animações
+```
 
 ## 🛠 Instalação
 
-<b>Android:</b>
+### Lançadora (ESP32)
 
-Faça o Download do JOGO.apk no seu celular.
-Execute o APK e siga as instruções de seu telefone.
+1. Copie `segredos.exemplo.h` para `segredos.h`, na mesma pasta do `main.ino`, e defina a senha do Access Point e o token. O `segredos.h` não vai para o repositório.
+2. Abra o `main.ino` na Arduino IDE com a placa **ESP32 Dev Module**.
+3. O firmware v2 usa Wi-Fi e Bluetooth ao mesmo tempo e não cabe na partição padrão: em **Ferramentas → Partition Scheme**, escolha **Huge APP (3MB No OTA/1MB SPIFFS)**.
+4. Grave na placa. A lançadora cria a rede `ESP32_Voz_Direta` e responde em `http://192.168.4.1`.
 
-```sh
-Coloque código do prompt de comnando se for necessário
-```
+### App mobile
 
-<b>Windows:</b>
-
-Não há instalação! Apenas executável!
-Encontre o JOGO.exe na pasta executáveis e execute-o como qualquer outro programa.
-
-```sh
-Coloque código do prompt de comnando se for necessário
-```
-
-<b>HTML:</b>
-
-Não há instalação!
-Encontre o index.html na pasta executáveis e execute-o como uma página WEB (através de algum browser).
+O app ainda não é distribuído pelas lojas. Para instalar, gere o app a partir do código (próxima seção). Para conhecer o app sem a lançadora, use **Conectar → Simulada**: uma lançadora de software com as mesmas regras, sem acionar motor nenhum.
 
 ## 💻 Configuração para Desenvolvimento
 
-Descreva como instalar todas as dependências para desenvolvimento e como rodar um test-suite automatizado de algum tipo. Se necessário, faça isso para múltiplas plataformas.
+Ferramentas necessárias:
 
-Para abrir este projeto você necessita das seguintes ferramentas:
+- [Node.js](https://nodejs.org/) 22.13 ou mais recente
+- [Xcode](https://developer.apple.com/xcode/) e [CocoaPods](https://cocoapods.org/) para iOS
+- [Android Studio](https://developer.android.com/studio) com JDK 17 ou 21 para Android
+- [Arduino IDE](https://www.arduino.cc/en/software) ou [arduino-cli](https://arduino.github.io/arduino-cli/) com o core ESP32 da Espressif, para o firmware
 
--<a href="https://godotengine.org/download">GODOT</a>
+O app usa Bluetooth e reconhecimento de fala nativos, por isso **não roda no Expo Go**: é preciso gerar um *development build*.
 
 ```sh
-make install
-npm test
-Coloque código do prompt de comnando se for necessário
+cd src/Entrega02/app
+npm install
+npx expo run:ios          # simulador ou iPhone conectado
+npx expo run:android      # emulador ou Android com depuração USB
+```
+
+Testes e verificações:
+
+```sh
+npm test                  # regras de voz, gamificação e máquina de estados
+npm run typecheck
+npm run lint
 ```
 
 ## 📋 Licença/License
-Utilize o link <https://chooser-beta.creativecommons.org/> para fazer uma licença CC BY 4.0.
+
+A definir pela equipe.
 
 ## 🎓 Referências
 
-Aqui estão as referências usadas no projeto.
-
-1. <https://github.com/iuricode/readme-template>
-2. <https://github.com/gabrieldejesus/readme-model>
-3. <https://chooser-beta.creativecommons.org/>
-4. <https://freesound.org/>
-5. <https://www.toptal.com/developers/gitignore>
-6. Músicas por: <a href="https://freesound.org/people/DaveJf/sounds/616544/"> DaveJf </a> e <a href="https://freesound.org/people/DRFX/sounds/338986/"> DRFX </a> ambas com Licença CC 0.
+1. [Expo](https://docs.expo.dev/) e [Expo Router](https://docs.expo.dev/router/introduction/)
+2. [React Native](https://reactnative.dev/)
+3. [React Native Reanimated](https://docs.swmansion.com/react-native-reanimated/)
+4. [expo-speech-recognition](https://github.com/jamsch/expo-speech-recognition)
+5. [react-native-ble-plx](https://github.com/dotintent/react-native-ble-plx)
+6. [Arduino core para ESP32 (Espressif)](https://docs.espressif.com/projects/arduino-esp32/)
+7. [Bricolage Grotesque (Google Fonts)](https://fonts.google.com/specimen/Bricolage+Grotesque)
+8. [Web Speech API (MDN)](https://developer.mozilla.org/docs/Web/API/Web_Speech_API), usada no controle por voz da Entrega 01
