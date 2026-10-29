@@ -1,14 +1,23 @@
 #include <WiFi.h>
 #include <WebServer.h>
 
-const char *ssid = "ESP32_Voz_Direta";
-const char *password = "12345678";
+// ---------------------------------------------------------------- segurança
+// Mitigações conforme o Relatório de Vulnerabilidades (Redes e Cibersegurança).
+// As credenciais ficam em segredos.h, fora do git (modelo: segredos.exemplo.h).
+#include "segredos.h"
+const char *ssid = NOCKHUG_SSID;
+// V1: senha forte (>=12 caracteres, alfanumérica com símbolo) no lugar de "12345678".
+const char *password = NOCKHUG_SENHA;
+// V2/V6: token compartilhado exigido por /ligar e /desligar.
+// Não vai embutido na página servida: o usuário digita uma vez na interface
+// e o navegador guarda em localStorage.
+const char *TOKEN = NOCKHUG_TOKEN;
 
 WebServer server(80);
 
-// Pinos dos motores (mantidos do código 2)
-const int pinoMotor1 = 25;
-const int pinoMotor2 = 26;
+// Pinos dos motores
+const int pinoMotor1 = 25;  // lançador    - motor de 14 000 RPM
+const int pinoMotor2 = 26;  // alimentador - motor de 20 RPM
 const int VELOCIDADE_ALVO = 50;
 
 // Variável para rastrear o status e informar a página web
@@ -41,6 +50,12 @@ const char PAGE_MAIN[] = R"rawliteral(
     <h2>ESP32 Voice Console - Motores</h2>
     <div id="statusBox">Status: <span id="ledStatus" style="color:#94a3b8">DESCONHECIDO</span></div>
     <button id="btnMic" onclick="toggleVoice()">1. Iniciar Escuta de Voz</button>
+  </div>
+
+  <div class="card">
+    <div style="font-weight:bold;font-size:13px;color:#94a3b8;margin-bottom:6px;">Token de acesso (obrigatório para acionar os motores):</div>
+    <input id="tokenInput" type="password" placeholder="cole aqui o token do firmware"
+           style="width:100%;box-sizing:border-box;padding:10px;border-radius:6px;border:1px solid #334155;background:#020617;color:#f8fafc;font-family:'Courier New',monospace;font-size:13px;">
   </div>
 
   <div class="card">
@@ -140,11 +155,27 @@ const char PAGE_MAIN[] = R"rawliteral(
       }
     }
 
+    const TOKEN_KEY = 'nockhug_token';
+
+    function getToken() {
+      const campo = document.getElementById('tokenInput');
+      return campo ? campo.value.trim() : '';
+    }
+
     function sendCmd(endpoint) {
+      const tk = getToken();
+      const url = tk ? endpoint + '?token=' + encodeURIComponent(tk) : endpoint;
       log("Enviando HTTP GET para: " + endpoint + " ...", "info");
-      fetch(endpoint)
-        .then(res => res.text())
+      fetch(url)
+        .then(res => {
+          if (res.status === 401) {
+            log("NAO AUTORIZADO (401): informe o token de acesso para acionar os motores.", "error");
+            return null;
+          }
+          return res.text();
+        })
         .then(data => {
+          if (data === null) return;
           log("ESP32 respondeu: " + data, "success");
           if(data === "LIGADO") {
             document.getElementById('ledStatus').innerHTML = '<span style="color:#4ade80">LIGADO</span>';
@@ -158,6 +189,16 @@ const char PAGE_MAIN[] = R"rawliteral(
     }
 
     window.onload = function() {
+      const campo = document.getElementById('tokenInput');
+      const salvo = localStorage.getItem(TOKEN_KEY);
+      if (salvo) {
+        campo.value = salvo;
+        log("Token carregado deste navegador.", "info");
+      }
+      campo.addEventListener('change', function() {
+        localStorage.setItem(TOKEN_KEY, this.value.trim());
+        log("Token salvo neste navegador.", "info");
+      });
       log("Pagina carregada com sucesso.", "info");
       sendCmd('/status');
     };
@@ -170,21 +211,39 @@ void handleRoot() {
   server.send(200, "text/html", PAGE_MAIN);
 }
 
+// V2/V6: só aciona os motores se o token compartilhado conferir.
+// Vale para /ligar e /desligar; /status é somente leitura e continua aberto.
+bool tokenValido() {
+  if (!server.hasArg("token")) return false;
+  return server.arg("token") == TOKEN;
+}
+
+void negarAcesso() {
+  Serial.println("[ESP32] -> Requisicao NEGADA (token ausente ou invalido)");
+  server.send(401, "text/plain", "NAO AUTORIZADO");
+}
+
 void handleLigar() {
+  if (!tokenValido()) { negarAcesso(); return; }
+
   // Acelera suavemente se os motores estiverem parados
   if (!motoresLigados) {
     for (int velocidade = 0; velocidade <= VELOCIDADE_ALVO; velocidade++) {
-      analogWrite(pinoMotor1, velocidade / 2); // Reduz pela metade (chega a 25)
-      analogWrite(pinoMotor2, velocidade * 2); // Dobra a velocidade (chega a 100)
+      // Lançador recebe o maior duty: 100 em 255 (aprox. 39,2%)
+      analogWrite(pinoMotor1, min(velocidade * 2, 255));
+      // Alimentador recebe o menor duty: 25 em 255 (aprox. 9,8%)
+      analogWrite(pinoMotor2, velocidade / 2);
       delay(15);
     }
     motoresLigados = true;
-    Serial.println("[ESP32] -> Motores LIGADOS (Pino 25: 50%, Pino 26: 200%)");
+    Serial.println("[ESP32] -> Motores LIGADOS (Pino 25: 100/255, Pino 26: 25/255)");
   }
   server.send(200, "text/plain", "LIGADO");
 }
 
 void handleDesligar() {
+  if (!tokenValido()) { negarAcesso(); return; }
+
   // Desliga os motores imediatamente
   analogWrite(pinoMotor1, 0);
   analogWrite(pinoMotor2, 0);

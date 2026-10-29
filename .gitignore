@@ -142,3 +142,20 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Credenciais do firmware (o repositório é público): use segredos.exemplo.h como modelo
+segredos.h
+
+# Chaves e certificados
+*.pem
+*.key
+*.p8
+*.p12
+*.jks
+*.keystore
+*.mobileprovision
+google-services.json
+GoogleService-Info.plist
+
+# Ferramentas de design locais (Impeccable)
+.impeccable/
