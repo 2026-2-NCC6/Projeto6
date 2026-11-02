@@ -128,9 +128,9 @@ npm run typecheck
 npm run lint
 ```
 
-## 📋 Licença/License
+## 📋 Licença
 
-A definir pela equipe.
+NockHug © 2026 by André Gregório dos Santos, Guilherme Reis Fogolin de Godoy, Pedro Henrique Nascimento Lemos, Yan Cezareto Ramos is licensed under CC BY-NC-ND 4.0
 
 ## 🎓 Referências
 
