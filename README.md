@@ -134,11 +134,18 @@ NockHug © 2026 by André Gregório dos Santos, Guilherme Reis Fogolin de Godoy,
 
 ## 🎓 Referências
 
-1. [Expo](https://docs.expo.dev/) e [Expo Router](https://docs.expo.dev/router/introduction/)
-2. [React Native](https://reactnative.dev/)
-3. [React Native Reanimated](https://docs.swmansion.com/react-native-reanimated/)
-4. [expo-speech-recognition](https://github.com/jamsch/expo-speech-recognition)
-5. [react-native-ble-plx](https://github.com/dotintent/react-native-ble-plx)
-6. [Arduino core para ESP32 (Espressif)](https://docs.espressif.com/projects/arduino-esp32/)
-7. [Bricolage Grotesque (Google Fonts)](https://fonts.google.com/specimen/Bricolage+Grotesque)
-8. [Web Speech API (MDN)](https://developer.mozilla.org/docs/Web/API/Web_Speech_API), usada no controle por voz da Entrega 01
+1. ASSOCIATION OF TENNIS PROFESSIONALS (ATP). Match and Player Statistics & Time-Motion Analysis in Professional Tennis. 2023. Disponível em: [https://www.atptour.com/en/stats](https://www.atptour.com/en/stats). Acesso em: 24 set. 2026.
+
+2. CONFEDERAÇÃO BRASILEIRA DE TÊNIS (CBT). Relatório Anual e Panorama do Tênis no Brasil. 2023. Disponível em: [https://cbt-tenis.com.br/](https://cbt-tenis.com.br/). Acesso em: 24 set. 2026.
+
+3. ERICSSON, K. Anders; KRAMPE, Ralf Th.; TESCH-RÖMER, Clemens. The Role of Deliberate Practice in the Acquisition of Expert Performance. Psychological Review, v. 100, n. 3, p. 363-406, 1993. Disponível em: [https://graphics8.nytimes.com/images/blogs/freakonomics/pdf/DeliberatePractice(PsychologicalReview).pdf](https://graphics8.nytimes.com/images/blogs/freakonomics/pdf/DeliberatePractice(PsychologicalReview).pdf). Acesso em: 24 set. 2026.
+
+4. IHRSA BRASIL. Global Report: O Mercado das Academias e Centros Esportivos no Brasil. 2023. Disponível em: [https://www.fitnessjournal.com.br/ihrsa-global-report](https://www.healthandfitness.org/pt/2023-ihrsa-global-report/). Acesso em: 24 set. 2026.
+
+5. INTERNATIONAL TENNIS FEDERATION (ITF). ITF Global Tennis Report: Participation and Facility Data. 2026. Disponível em: [https://www.itftennis.com/en/about-us/organisation/about-the-itf/global-tennis-report/](https://www.world.tennis/en/about-us/organisation/publications-and-resources/publications/). Acesso em: 24 set. 2026.
+
+6. LOBSTER SPORTS. Tennis Ball Machines and Accessories Product Line. 2024. Disponível em: [https://www.lobstersports.com/](https://www.lobstersports.com/). Acesso em: 24 set. 2026.
+
+7. SLINGER BAG. Slinger Launcher: Portable Tennis Ball Launcher. 2024. Disponível em: [https://slingerbag.com/](https://slingerbag.com/). Acesso em: 24 set. 2026.
+
+8. SPINFIRE SPORT. Spinfire Pro 2 Tennis Ball Machine Specifications. 2024. Disponível em: https://www.spinfiresport.com/. Acesso em: 24 set. 2026.
