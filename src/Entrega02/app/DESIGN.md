@@ -1,6 +1,6 @@
 # Design — NockHug
 
-Registro do sistema visual como ele foi construído (29/10/2026). Os valores vivem em `src/ui/tema.ts`, `src/ui/movimento.ts` e `src/ui/componentes.tsx`; este arquivo explica o porquê.
+Registro do sistema visual como ele foi construído (29/10/2026; atualizado com a velocidade por treino, o sheet de treino e a retomada do descanso). Os valores vivem em `src/ui/tema.ts`, `src/ui/movimento.ts` e `src/ui/componentes.tsx`; este arquivo explica o porquê.
 
 ## Ideia
 
@@ -31,6 +31,30 @@ O tema segue o celular por padrão (`config.tema = 'sistema'`), com opção de f
 ## Forma
 
 Raios grandes e macios (cartões 22, quadra 26, botões até 22, chips em pílula). Alvos de toque ≥ 44 pt. Ícones de traço próprios em grade 24, traço 2, pontas redondas (`src/ui/icones.tsx`) — sem emoji nem glifos Unicode no lugar de ícone.
+
+## Velocidade do treino
+
+As três combinações (Forte, Médio, Fraco) são cartões de três colunas com o nome em Bricolage, o par `60/30` em `Numero` e duas barras finas — verde para o lançador, bege para o alimentador. A escolhida fica em limão com tinta verde, a mesma regra do botão principal: a cor não decora, ela diz qual está ativa. O Personalizado é uma linha calma abaixo, com dois passos de 5% e uma barra por motor; o piso de 15% do alimentador e o teto de 40% aparecem na legenda, e o lançador abaixo de 10% ganha um aviso bege, nunca vermelho (é uma escolha, não um erro).
+
+No sheet de treino, a velocidade é uma seção obrigatória: o botão Salvar fica desabilitado e a linha de pendências diz o que falta. O sheet é uma página modal (page sheet no iOS, slide-up no Android) com Cancelar em 44 pt, sem swipe de descarte; o botão voltar do Android passa pelo mesmo aviso de alterações não salvas.
+
+## Partida, descanso e retomada
+
+Nenhum motor liga sem aviso. Todo “liga”, “retoma”, fim de descanso e disparo de calibração passa por uma contagem de 5 s: na quadra, o anel limão se fecha em 5 s, o número (Bricolage 72) entra com um zoom curto a cada segundo e um bip seco acompanha cada número; no zero, um bip mais longo e agudo, e só então o comando sai. “Cancelar” é o maior alvo da quadra, um botão de vidro de 58 pt, e a frase abaixo do número lembra que “Nock, desliga” cancela sem as mãos. Durante a contagem os botões de Ligar/Pausar somem: a única ação é cancelar.
+
+O anel do descanso continua esvaziando na thread de UI. Nos últimos 5 segundos ele vira limão, o número pulsa devagar (`Pulso`, desligado com Reduzir Movimento) e a mesma contagem de bips toca. “Pular descanso” é um link limão discreto e leva à contagem, não aos motores. O ajuste de ±5 s (`AjusteDescanso`) é uma linha fixa no pé da quadra, durante a série e no descanso, com o passo no tema escuro da quadra. Se a retomada for cancelada, o botão principal vira “Ligar” e o texto explica por quê.
+
+## Emergência fora da sessão
+
+Quando a sessão está ativa com motores possíveis, qualquer tela que não seja a própria sessão mostra uma barra de "Parar tudo" no rodapé (`EmergenciaFlutuante`): o diagnóstico, as configurações e o checklist não podem deixar o único controle de parada uma tela atrás. No checklist o botão entra no rodapé, junto do Armar, porque a barra flutuante cobriria a ação principal. Ao encerrar, o app só grava e navega depois de confirmar `ARMADO`/`REPOUSO`/`PARADA_SEGURA`; sem confirmação, fica na sessão com o cartão "Não confirmei a parada" e o botão vermelho à mão.
+
+## Erros da lançadora
+
+O cartão de falha tem borda vermelha, um selo com o código (`409`, `401`, `sem resposta`), o que aconteceu em uma frase e o que fazer em outra. As ações são empilhadas e largas (luvas, sol): Reparar, Reconectar, Rearmar. O detalhe técnico (`op · estado · motivo · resultado · erro · fw · latência`) fica atrás de “Detalhes técnicos”, em texto selecionável de 11 pt; é o que responde “por que não armou?” sem abrir o monitor serial. O diagnóstico da lançadora é uma lista de linhas rótulo/valor, sem cartões decorativos.
+
+## Voz e som
+
+O teste de microfone põe a bola da marca grande sobre a quadra, com uma barra de volume, a transcrição ao vivo e o comando entendido. Os bips são curtos e secos: um por segundo na contagem de 5 s (Dó6, 160 ms), um mais longo e agudo na partida (Sol6, 450 ms) e um toque na ativação. A contagem é aviso de segurança e toca sempre; o interruptor das Configurações cala só o toque de ativação. Sem o módulo de áudio, a voz diz “Atenção, cinco segundos”. O som nunca é o único retorno — o anel, o número, o texto e um impacto háptico por segundo (mais forte nos dois últimos) contam a mesma história. O cartão do microfone diz por onde o app está ouvindo (“pelo fone Bluetooth …”).
 
 ## Movimento
 

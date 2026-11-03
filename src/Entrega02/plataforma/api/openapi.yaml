@@ -1,0 +1,313 @@
+openapi: 3.0.3
+info:
+  title: NockHug Plataforma
+  version: 1.0.0
+  description: API /v1 da plataforma mãe. A sessão na quadra não passa por aqui.
+servers:
+  - url: http://127.0.0.1:3099
+paths:
+  /v1/entrar:
+    post:
+      operationId: entrar
+      summary: Troca e-mail e senha por um JWT.
+      responses:
+        '200':
+          description: Credencial aceita.
+        '401':
+          description: Credencial inválida.
+        '429':
+          description: Limite de tentativas.
+  /v1/eu:
+    get:
+      operationId: eu
+      summary: Usuário do Bearer.
+      responses:
+        '200':
+          description: Usuário autenticado.
+        '401':
+          description: Sem Bearer válido.
+  /v1/treinos:
+    get:
+      operationId: listarTreinos
+      summary: Catálogo publicado ou rascunhos do autor.
+      parameters:
+        - in: query
+          name: status
+          schema: { type: string, enum: [publicado, rascunho] }
+        - in: query
+          name: limit
+          schema: { type: integer }
+        - in: query
+          name: cursor
+          schema: { type: string }
+        - in: query
+          name: objetivo
+          schema: { type: string }
+        - in: query
+          name: nivel
+          schema: { type: string }
+        - in: query
+          name: categoria
+          schema: { type: string }
+      responses:
+        '200':
+          description: Página de treinos.
+        '400':
+          description: Status inválido para quem não é autor.
+        '401':
+          description: Rascunho sem autenticação.
+        '403':
+          description: Papel sem acesso ao rascunho.
+    post:
+      operationId: criarTreino
+      summary: Cria um rascunho. Só o autor.
+      responses:
+        '201':
+          description: Rascunho criado.
+        '401':
+          description: Sem Bearer válido.
+        '403':
+          description: Papel sem permissão.
+        '422':
+          description: Campo fora da regra.
+  /v1/treinos/{id}:
+    get:
+      operationId: obterTreino
+      summary: Versão publicada, ou o rascunho se o autor for o dono.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Treino visível para quem pede.
+        '404':
+          description: Inexistente ou invisível.
+    patch:
+      operationId: editarRascunho
+      summary: Atualiza o rascunho do autor. Exige If-Match.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+        - in: header
+          name: If-Match
+          schema: { type: string }
+      responses:
+        '200':
+          description: Rascunho atualizado.
+        '401':
+          description: Sem Bearer válido.
+        '403':
+          description: Papel sem permissão.
+        '404':
+          description: Inexistente ou de outro autor.
+        '409':
+          description: Versão ou treino já publicado.
+        '422':
+          description: Campo fora da regra.
+  /v1/treinos/{id}/revisoes:
+    post:
+      operationId: abrirRevisao
+      summary: Abre um rascunho sem tirar a versão publicada do catálogo.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '201':
+          description: Revisão aberta.
+        '401':
+          description: Sem Bearer válido.
+        '403':
+          description: Papel sem permissão.
+        '404':
+          description: Inexistente ou de outro autor.
+        '409':
+          description: Já existe revisão aberta.
+  /v1/treinos/{id}/publicar:
+    post:
+      operationId: publicarTreino
+      summary: Publica o rascunho e grava o snapshot. Exige If-Match.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+        - in: header
+          name: If-Match
+          schema: { type: string }
+      responses:
+        '200':
+          description: Versão publicada.
+        '401':
+          description: Sem Bearer válido.
+        '403':
+          description: Papel sem permissão.
+        '404':
+          description: Inexistente ou de outro autor.
+        '409':
+          description: Versão, já publicado ou estado do treino.
+        '422':
+          description: Ainda falta campo para publicar.
+  /v1/treinos/{id}/versoes:
+    get:
+      operationId: listarVersoes
+      summary: Versões já publicadas.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Lista de versões publicadas.
+        '404':
+          description: Sem versão publicada.
+  /v1/treinos/{id}/versoes/{versao}:
+    get:
+      operationId: obterVersao
+      summary: Snapshot de uma versão publicada.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+        - in: path
+          name: versao
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Snapshot.
+        '404':
+          description: Versão inexistente.
+  /v1/sessoes:
+    post:
+      operationId: receberSessao
+      summary: Grava a sessão do praticante. O id é a chave de idempotência.
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          schema: { type: string }
+      responses:
+        '201':
+          description: Primeira gravação.
+        '200':
+          description: O mesmo corpo já estava gravado.
+        '400':
+          description: Header incoerente.
+        '401':
+          description: Sem Bearer válido.
+        '409':
+          description: O mesmo id chegou com outro corpo.
+        '413':
+          description: Corpo acima de 256 KB.
+        '422':
+          description: Campo fora da regra.
+    get:
+      operationId: listarSessoes
+      summary: Autor vê todas. Praticante vê as suas.
+      parameters:
+        - in: query
+          name: limit
+          schema: { type: integer }
+        - in: query
+          name: cursor
+          schema: { type: string }
+        - in: query
+          name: treinoId
+          schema: { type: string }
+        - in: query
+          name: de
+          schema: { type: integer }
+        - in: query
+          name: ate
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Página de sessões.
+        '401':
+          description: Sem Bearer válido.
+  /v1/sessoes/{id}:
+    get:
+      operationId: obterSessao
+      summary: Dono ou autor. Os demais recebem 404.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Sessão e recebidaEm.
+        '401':
+          description: Sem Bearer válido.
+        '404':
+          description: Inexistente ou de outro praticante.
+  /v1/usuarios:
+    get:
+      operationId: listarUsuarios
+      summary: Autor lista usuários, sem hash.
+      parameters:
+        - in: query
+          name: limit
+          schema: { type: integer }
+        - in: query
+          name: cursor
+          schema: { type: string }
+      responses:
+        '200':
+          description: Página de usuários.
+        '401':
+          description: Sem Bearer válido.
+        '403':
+          description: Papel sem permissão.
+  /v1/auditoria:
+    get:
+      operationId: listarAuditoria
+      summary: Autor lista a auditoria, sem senha e sem corpo de sessão.
+      parameters:
+        - in: query
+          name: limit
+          schema: { type: integer }
+        - in: query
+          name: cursor
+          schema: { type: string }
+      responses:
+        '200':
+          description: Página de auditoria.
+        '401':
+          description: Sem Bearer válido.
+        '403':
+          description: Papel sem permissão.
+  /v1/saude:
+    get:
+      operationId: saude
+      summary: Processo no ar, sem abrir o banco.
+      responses:
+        '200':
+          description: status ok.
+  /v1/saude/banco:
+    get:
+      operationId: saudeBanco
+      summary: Confere o banco. Pode demorar e responder 503.
+      responses:
+        '200':
+          description: Banco respondeu.
+        '503':
+          description: Banco indisponível.
+  /v1/openapi.yaml:
+    get:
+      operationId: contrato
+      summary: Este arquivo.
+      responses:
+        '200':
+          description: YAML do contrato.
+          content:
+            text/yaml:
+              schema:
+                type: string

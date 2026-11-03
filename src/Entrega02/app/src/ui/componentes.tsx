@@ -1,7 +1,7 @@
 // Componentes base do NockHug (quadra à noite, bola limão).
 
 import { router } from 'expo-router';
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   type LayoutChangeEvent,
@@ -15,10 +15,10 @@ import {
   View,
   type ViewStyle,
 } from 'react-native';
-import Animated from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Icone from './icones';
-import { CSS_EASE_OUT, haptico } from './movimento';
+import { CSS_EASE_OUT, EASE_IN_OUT, haptico } from './movimento';
 import { type Cores, fontes, type Peso, pesos, useTema } from './tema';
 
 const PressavelAnimado = Animated.createAnimatedComponent(Pressable);
@@ -33,6 +33,7 @@ export function Toque({
   ...props
 }: Omit<PressableProps, 'style' | 'children'> & { children: ReactNode; estilo?: StyleProp<ViewStyle>; escala?: number }) {
   const [pressionado, setPressionado] = useState(false);
+  const reduzir = useReducedMotion();
   return (
     <PressavelAnimado
       pressRetentionOffset={16}
@@ -48,7 +49,7 @@ export function Toque({
       style={[
         estilo,
         {
-          transform: [{ scale: pressionado && !props.disabled ? escala : 1 }],
+          transform: [{ scale: pressionado && !props.disabled && !reduzir ? escala : 1 }],
           transitionProperty: 'transform',
           transitionDuration: pressionado ? 100 : 220,
           transitionTimingFunction: CSS_EASE_OUT,
@@ -113,10 +114,15 @@ export function Numero({ children, tamanho = 40, cor, estilo }: { children: Reac
   );
 }
 
-export function Texto({ children, tamanho = 16, cor, peso = 'texto', estilo, linhas }: { children: ReactNode; tamanho?: number; cor?: string; peso?: Peso; estilo?: StyleProp<TextStyle>; linhas?: number }) {
+export function Texto({ children, tamanho = 16, cor, peso = 'texto', estilo, linhas, selectable, max }: { children: ReactNode; tamanho?: number; cor?: string; peso?: Peso; estilo?: StyleProp<TextStyle>; linhas?: number; selectable?: boolean; max?: number }) {
   const { c } = useTema();
   return (
-    <Text numberOfLines={linhas} style={[{ fontSize: tamanho, fontWeight: pesos[peso], lineHeight: Math.round(tamanho * 1.38) /* inteiro: entrelinha fracionária corta a última linha no iOS */, color: cor ?? c.texto }, estilo]}>
+    <Text
+      numberOfLines={linhas}
+      selectable={selectable}
+      maxFontSizeMultiplier={max}
+      style={[{ fontSize: tamanho, fontWeight: pesos[peso], lineHeight: Math.round(tamanho * 1.38) /* inteiro: entrelinha fracionária corta a última linha no iOS */, color: cor ?? c.texto }, estilo]}
+    >
       {children}
     </Text>
   );
@@ -133,7 +139,7 @@ export function Rotulo({ children, cor }: { children: ReactNode; cor?: string })
   return <Text style={{ fontSize: 13, fontWeight: '600', letterSpacing: 0.4, color: cor ?? c.textoSuave, textTransform: 'uppercase', marginTop: 6, marginLeft: 4 }}>{children}</Text>;
 }
 
-type Variante = 'primario' | 'quadra' | 'contorno' | 'perigo' | 'claro' | 'suave';
+type Variante = 'primario' | 'quadra' | 'contorno' | 'perigo' | 'claro' | 'suave' | 'vidro';
 
 function coresDoBotao(v: Variante, c: Cores) {
   switch (v) {
@@ -141,6 +147,9 @@ function coresDoBotao(v: Variante, c: Cores) {
     case 'quadra': return { bg: c.sombra ? c.quadra : c.quadraAlta, fg: c.quadraTexto, borda: c.quadra, sombra: '' };
     case 'perigo': return { bg: c.perigo, fg: '#FFFFFF', borda: c.perigo, sombra: '0px 10px 24px -12px rgba(215,51,46,0.7)' };
     case 'claro': return { bg: '#FFFFFF', fg: c.perigoFundo, borda: '#FFFFFF', sombra: '' };
+    // Botão de vidro: existe sobre a quadra, onde o cartão e o contorno
+    // normais não têm contraste. Ação calma, não destrutiva.
+    case 'vidro': return { bg: 'rgba(246,249,232,0.13)', fg: c.quadraTexto, borda: 'rgba(246,249,232,0.24)', sombra: '' };
     case 'suave': return { bg: c.sutil, fg: c.texto, borda: c.sutil, sombra: '' };
     default: return { bg: 'transparent', fg: c.texto, borda: c.bordaForte, sombra: '' };
   }
@@ -189,7 +198,7 @@ export function Botao({
           height: altura,
           borderRadius: Math.min(22, altura / 2),
           backgroundColor: desabilitado ? c.sutil : k.bg,
-          borderWidth: variante === 'contorno' ? 1.5 : variante === 'primario' && !desabilitado ? 1 : 0,
+          borderWidth: variante === 'contorno' ? 1.5 : variante === 'vidro' ? 1 : variante === 'primario' && !desabilitado ? 1 : 0,
           borderColor: k.borda,
           alignItems: 'center',
           justifyContent: 'center',
@@ -257,17 +266,19 @@ export function Cabecalho({ titulo, sub, direita, aoVoltar }: { titulo: string; 
       <Voltar para={aoVoltar} />
       <View style={{ flex: 1 }}>
         <Titulo tamanho={24} linhas={1}>{titulo}</Titulo>
-        {sub ? <Texto tamanho={13} cor={c.textoSuave} linhas={1}>{sub}</Texto> : null}
+        {sub ? <Texto tamanho={13} cor={c.textoSuave} linhas={2}>{sub}</Texto> : null}
       </View>
       {direita}
     </View>
   );
 }
 
-export function Cartao({ children, estilo, destaque }: { children: ReactNode; estilo?: StyleProp<ViewStyle>; destaque?: string }) {
+export function Cartao({ children, estilo, destaque, live }: { children: ReactNode; estilo?: StyleProp<ViewStyle>; destaque?: string; live?: boolean }) {
   const { c } = useTema();
   return (
     <View
+      accessibilityLiveRegion={live ? 'polite' : undefined}
+      accessibilityRole={live ? 'alert' : undefined}
       style={[
         {
           backgroundColor: c.cartao,
@@ -311,9 +322,9 @@ export function Quadra({ children, estilo, linhas = true }: { children: ReactNod
 
 export function Pilula({ texto, fundo, cor, icone }: { texto: string; fundo: string; cor: string; icone?: ReactNode }) {
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7, paddingHorizontal: 11, height: 30, borderRadius: 15, backgroundColor: fundo, alignSelf: 'flex-start' }}>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7, paddingHorizontal: 11, paddingVertical: 4, minHeight: 30, borderRadius: 15, backgroundColor: fundo, alignSelf: 'flex-start' }}>
       {icone ?? <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: cor }} />}
-      <Text style={{ fontSize: 13, fontWeight: '700', letterSpacing: 0.2, color: cor }}>{texto}</Text>
+      <Text numberOfLines={1} maxFontSizeMultiplier={1.3} style={{ fontSize: 13, fontWeight: '700', letterSpacing: 0.2, color: cor }}>{texto}</Text>
     </View>
   );
 }
@@ -351,6 +362,7 @@ export function Opcao({ texto, ativo, aoTocar, redondo }: { texto: string; ativo
 // Controle segmentado com o indicador deslizando sob a opção escolhida.
 export function Segmentos<T extends string>({ opcoes, valor, aoMudar, altura = 36 }: { opcoes: [T, string][]; valor: T; aoMudar: (v: T) => void; altura?: number }) {
   const { c } = useTema();
+  const reduzir = useReducedMotion();
   const [largura, setLargura] = useState(0);
   const i = Math.max(0, opcoes.findIndex(([v]) => v === valor));
   const seg = largura ? (largura - 6) / opcoes.length : 0;
@@ -370,7 +382,7 @@ export function Segmentos<T extends string>({ opcoes, valor, aoMudar, altura = 3
             boxShadow: '0px 1px 3px rgba(0,0,0,0.12)',
             transform: [{ translateX: i * seg }],
             transitionProperty: 'transform',
-            transitionDuration: 240,
+            transitionDuration: reduzir ? 0 : 240,
             transitionTimingFunction: CSS_EASE_OUT,
           }}
         />
@@ -393,24 +405,59 @@ export function Segmentos<T extends string>({ opcoes, valor, aoMudar, altura = 3
   );
 }
 
-export function Passo({ valor, aoMenos, aoMais, rotulo }: { valor: string | number; aoMenos: () => void; aoMais: () => void; rotulo: string }) {
+export function Passo({ valor, aoMenos, aoMais, rotulo, escuro, minimo, maximo }: { valor: string | number; aoMenos: () => void; aoMais: () => void; rotulo: string; escuro?: boolean; minimo?: number; maximo?: number }) {
   const { c } = useTema();
-  const b = { width: 44, height: 44, borderRadius: 22, backgroundColor: c.sutil, alignItems: 'center' as const, justifyContent: 'center' as const };
-  const tocar = (f: () => void) => () => {
+  const cor = escuro ? c.quadraTexto : c.texto;
+  const b = { width: 44, height: 44, borderRadius: 22, backgroundColor: escuro ? 'rgba(246,249,232,0.14)' : c.sutil, alignItems: 'center' as const, justifyContent: 'center' as const };
+  const texto = String(valor);
+  const numero = Number(texto.replace(/[^\d-]/g, ''));
+  const temNumero = Number.isFinite(numero) && texto.replace(/[^\d-]/g, '') !== '';
+  const noMinimo = temNumero && minimo != null && numero <= minimo;
+  const noMaximo = temNumero && maximo != null && numero >= maximo;
+  const agir = (direcao: 'increment' | 'decrement') => {
+    if ((direcao === 'increment' && noMaximo) || (direcao === 'decrement' && noMinimo)) return;
     haptico.selecao();
-    f();
+    if (direcao === 'increment') aoMais();
+    else aoMenos();
   };
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-      <Toque accessibilityRole="button" accessibilityLabel={`Diminuir ${rotulo}`} onPress={tocar(aoMenos)} escala={0.9} estilo={b}>
-        <Icone.Menos cor={c.texto} />
+    <View
+      accessible
+      accessibilityRole="adjustable"
+      accessibilityLabel={rotulo}
+      accessibilityValue={{ text: texto, ...(minimo != null ? { min: minimo } : {}), ...(maximo != null ? { max: maximo } : {}), ...(temNumero ? { now: numero } : {}) }}
+      accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
+      onAccessibilityAction={(e) => {
+        const acao = e.nativeEvent.actionName;
+        if (acao === 'increment' || acao === 'decrement') agir(acao);
+      }}
+      style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
+    >
+      <Toque accessibilityElementsHidden importantForAccessibility="no-hide-descendants" disabled={noMinimo} accessibilityLabel={`Diminuir ${rotulo}`} onPress={() => agir('decrement')} escala={0.9} estilo={[b, { opacity: noMinimo ? 0.4 : 1 }]}>
+        <Icone.Menos cor={cor} />
       </Toque>
-      <Numero tamanho={22} estilo={{ minWidth: 58, textAlign: 'center' }}>{valor}</Numero>
-      <Toque accessibilityRole="button" accessibilityLabel={`Aumentar ${rotulo}`} onPress={tocar(aoMais)} escala={0.9} estilo={b}>
-        <Icone.Mais cor={c.texto} />
+      <Numero tamanho={22} cor={cor} estilo={{ minWidth: 58, textAlign: 'center' }}>{valor}</Numero>
+      <Toque accessibilityElementsHidden importantForAccessibility="no-hide-descendants" disabled={noMaximo} accessibilityLabel={`Aumentar ${rotulo}`} onPress={() => agir('increment')} escala={0.9} estilo={[b, { opacity: noMaximo ? 0.4 : 1 }]}>
+        <Icone.Mais cor={cor} />
       </Toque>
     </View>
   );
+}
+
+// Pulso lento para o que está prestes a acontecer (o fim do descanso). Some
+// com o "Reduzir movimento" do sistema.
+export function Pulso({ ativo, escala = 1.06, children }: { ativo: boolean; escala?: number; children: ReactNode }) {
+  const reduzir = useReducedMotion();
+  const valor = useSharedValue(1);
+  useEffect(() => {
+    if (ativo && !reduzir) {
+      valor.set(withRepeat(withSequence(withTiming(escala, { duration: 620, easing: EASE_IN_OUT }), withTiming(1, { duration: 620, easing: EASE_IN_OUT })), -1, true));
+    } else {
+      valor.set(withTiming(1, { duration: 180 }));
+    }
+  }, [ativo, escala, reduzir, valor]);
+  const estilo = useAnimatedStyle(() => ({ transform: [{ scale: valor.get() }] }));
+  return <Animated.View style={estilo}>{children}</Animated.View>;
 }
 
 export function Interruptor({ ligado, aoTrocar, rotulo, sub }: { ligado: boolean; aoTrocar: () => void; rotulo: string; sub?: string }) {
@@ -437,6 +484,7 @@ export function Interruptor({ ligado, aoTrocar, rotulo, sub }: { ligado: boolean
 // largura não reflui nada à volta.
 export function Barra({ fracao, cor, trilho, altura = 8 }: { fracao: number; cor?: string; trilho?: string; altura?: number }) {
   const { c } = useTema();
+  const reduzir = useReducedMotion();
   const f = Math.max(0, Math.min(1, fracao));
   return (
     <View style={{ height: altura, borderRadius: altura / 2, backgroundColor: trilho ?? c.trilho, overflow: 'hidden' }}>
@@ -450,7 +498,7 @@ export function Barra({ fracao, cor, trilho, altura = 8 }: { fracao: number; cor
           borderRadius: altura / 2,
           backgroundColor: cor ?? c.progresso,
           transitionProperty: 'width',
-          transitionDuration: 420,
+          transitionDuration: reduzir ? 0 : 420,
           transitionTimingFunction: CSS_EASE_OUT,
         }}
       />

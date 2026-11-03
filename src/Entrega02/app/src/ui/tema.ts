@@ -48,6 +48,8 @@ export type Cores = {
   perigo: string;
   perigoSuave: string;
   perigoTexto: string;
+  // Vermelho claro legível sobre a quadra verde.
+  perigoQuadra: string;
   perigoFundo: string;
   calor: [string, string, string, string];
   sombra: string; // boxShadow dos cartões ('' no escuro: a borda já separa)
@@ -84,6 +86,7 @@ const claro: Cores = {
   perigo: '#D7332E',
   perigoSuave: '#FBE4E0',
   perigoTexto: '#9E1A16',
+  perigoQuadra: '#FFB4AD',
   perigoFundo: '#5C1311',
   calor: ['#E5E4D7', '#C6D69A', paleta.verdeSec, paleta.verde],
   sombra: '0px 1px 2px rgba(21,55,13,0.06), 0px 10px 24px -14px rgba(21,55,13,0.28)',
@@ -120,6 +123,7 @@ const escuro: Cores = {
   perigo: '#EE4D45',
   perigoSuave: '#3A1513',
   perigoTexto: '#FF9F97',
+  perigoQuadra: '#FFB4AD',
   perigoFundo: '#4A0F0D',
   calor: ['#18291A', '#33501A', '#83A82A', paleta.limao],
   sombra: '',

@@ -1,0 +1,97 @@
+:root {
+  color: #11240d;
+  background: #f2f1e8;
+  font-family: system-ui, sans-serif;
+  line-height: 1.4;
+}
+
+* { box-sizing: border-box; }
+
+body { margin: 0; }
+
+:focus-visible {
+  outline: 3px solid #15370d;
+  outline-offset: 2px;
+}
+
+a { color: #15370d; }
+
+button, input, select {
+  font: inherit;
+  color: #11240d;
+}
+
+button, .principal, input, select {
+  min-height: 44px;
+}
+
+button {
+  border: 1px solid #15370d;
+  background: #fff;
+  border-radius: 8px;
+  padding: 0 14px;
+  cursor: pointer;
+}
+
+button.principal {
+  background: #dfff4f;
+  color: #15370d;
+  border-color: #15370d;
+  font-weight: 700;
+}
+
+button.perigo {
+  color: #d7332e;
+  border-color: #d7332e;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+input, select {
+  width: 100%;
+  border: 1px solid #11240d;
+  border-radius: 8px;
+  background: #fff;
+  padding: 8px 10px;
+}
+
+label { display: block; font-weight: 650; margin-bottom: 4px; }
+
+.moldura { max-width: 880px; margin: 0 auto; padding: 20px; }
+
+.topo {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+nav { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+
+.cartao {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.grade { display: grid; gap: 12px; }
+
+.erro, [role="alert"] { color: #d7332e; }
+
+.linha { display: flex; gap: 8px; flex-wrap: wrap; }
+
+button[aria-pressed="true"] {
+  background: #dfff4f;
+  color: #15370d;
+}
+
+table { width: 100%; border-collapse: collapse; background: #fff; }
+
+th, td { text-align: left; padding: 10px; border-bottom: 1px solid #d9d6c8; }
+
+th { font-weight: 700; }

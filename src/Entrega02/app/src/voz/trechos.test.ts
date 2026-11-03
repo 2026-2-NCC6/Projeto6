@@ -16,8 +16,8 @@ describe('AcompanhadorDeTrechos', () => {
     const primeiro = a.atualizar('Nock ligar');
     a.consumir();
     const segundo = a.atualizar('Nock ligar Nock desligar');
-    expect(interpretar(primeiro, 'Nock', false)).toEqual({ tipo: 'comando', comando: 'ligar' });
-    expect(interpretar(segundo, 'Nock', false)).toEqual({ tipo: 'comando', comando: 'desligar' });
+    expect(interpretar(primeiro, 'Nock', false)).toEqual({ tipo: 'comando', comando: 'ligar', ativada: true });
+    expect(interpretar(segundo, 'Nock', false)).toEqual({ tipo: 'comando', comando: 'desligar', ativada: true });
   });
 
   test('nada novo depois de consumir', () => {
@@ -32,6 +32,16 @@ describe('AcompanhadorDeTrechos', () => {
     a.atualizar('Nock ligar agora mesmo');
     a.consumir();
     expect(a.atualizar('para')).toBe('para');
+  });
+
+  test('trechoDe mede a alternativa contra o consumido da principal', () => {
+    const a = new AcompanhadorDeTrechos();
+    a.atualizar('Nock liga');
+    a.consumir();
+    expect(a.trechoDe('Nock liga nock desliga')).toBe('nock desliga');
+    expect(a.trechoDe('Nock liga')).toBe('');
+    expect(a.trechoDe('Nock liga agora Nock desliga')).toBe('agora nock desliga');
+    expect(a.trechoDe('Nock liga agora Nock desliga Nock pausa Nock retoma Nock para Nock sobe Nock vai', 3)).toBe('sobe nock vai');
   });
 
   test('reiniciar volta a entregar a transcrição inteira', () => {

@@ -159,6 +159,34 @@ export const Celular = ({ cor, tamanho = 20 }: P) => (
 export const Fala = ({ cor, tamanho = 20 }: P) => (
   <Svg {...base(tamanho)}><Path d="M4.5 5.5h15a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H11l-4.5 3.5v-3.5h-2a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1z" {...traco(cor)} /></Svg>
 );
+// Fechar um sheet.
+export const Fechar = ({ cor, tamanho = 20 }: P) => (
+  <Svg {...base(tamanho)}><Path d="M6 6l12 12M18 6L6 18" {...traco(cor, 2.2)} /></Svg>
+);
+// Editar um treino.
+export const Lapis = ({ cor, tamanho = 20 }: P) => (
+  <Svg {...base(tamanho)}>
+    <Path d="M4 20l4.2-.9L19.5 7.8a2.1 2.1 0 0 0-3-3L5.2 15.9z" {...traco(cor, 1.9)} />
+    <Path d="M14.8 6.5l2.7 2.7M4 20l.9-4.1" {...traco(cor, 1.9)} />
+  </Svg>
+);
+// Som: o aviso de que os motores vão ligar.
+export const Som = ({ cor, tamanho = 20 }: P) => (
+  <Svg {...base(tamanho)}>
+    <Path d="M4 9.5h3l4.5-3.8v12.6L7 14.5H4z" {...traco(cor, 1.9)} />
+    <Path d="M15 8.8a4.6 4.6 0 0 1 0 6.4M17.8 6.2a8.2 8.2 0 0 1 0 11.6" {...traco(cor, 1.9)} />
+  </Svg>
+);
+// Reparar / de novo.
+export const Repetir = ({ cor, tamanho = 20 }: P) => (
+  <Svg {...base(tamanho)}>
+    <Path d="M4.5 11a7.5 7.5 0 1 1 2 5.2M4.5 6v5h5" {...traco(cor, 2)} />
+  </Svg>
+);
+// Abrir/fechar um bloco (detalhes técnicos, personalizar).
+export const SetaBaixo = ({ cor, tamanho = 18 }: P) => (
+  <Svg {...base(tamanho)}><Path d="M6 9.5l6 6 6-6" {...traco(cor, 2.2)} /></Svg>
+);
 export const Alvo = ({ cor, tamanho = 20 }: P) => (
   <Svg {...base(tamanho)}>
     <Circle cx={12} cy={12} r={8.5} {...traco(cor)} />

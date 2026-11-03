@@ -12,7 +12,7 @@ export default function OnboardingSeguranca() {
   const itens: { t: string; d: string; icone: ReactNode; fundo: string }[] = [
     { t: 'Só liga depois de armar', d: 'Um checklist rápido no início de cada sessão. Sem ele, “liga” é recusado.', icone: <Icone.Escudo cor={paleta.verde} tamanho={22} />, fundo: paleta.limao },
     { t: '“Para!” vale sempre', d: 'Sem palavra de ativação, a qualquer momento. O botão vermelho também.', icone: <Icone.Parar cor="#FFFFFF" tamanho={22} />, fundo: c.perigo },
-    { t: 'Perdeu o celular? Ela para', d: 'Sem sinal do app por 3 segundos, a lançadora desliga os motores sozinha.', icone: <Icone.Wifi cor={paleta.verde} tamanho={22} />, fundo: paleta.bege },
+    { t: 'Perdeu o celular? Ela para', d: 'Sem sinal do app por 4 segundos, a lançadora desliga os motores sozinha.', icone: <Icone.Wifi cor={paleta.verde} tamanho={22} />, fundo: paleta.bege },
   ];
 
   return (

@@ -21,7 +21,12 @@
             }
           }
         },
-        "CADisableMinimumFrameDurationOnPhone": true
+        "CADisableMinimumFrameDurationOnPhone": true,
+        "UIRequiresPersistentWiFi": true,
+        "UIBackgroundModes": [
+          "audio",
+          "bluetooth-central"
+        ]
       },
       "appleTeamId": "96NVTU77NR"
     },
@@ -81,7 +86,15 @@
             "image": "./assets/splash-icon.png"
           }
         }
-      ]
+      ],
+      [
+        "expo-audio",
+        {
+          "recordAudioAndroid": false,
+          "enableBackgroundPlayback": false
+        }
+      ],
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true

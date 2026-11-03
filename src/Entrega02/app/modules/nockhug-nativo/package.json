@@ -1,0 +1,9 @@
+{
+  "name": "nockhug-nativo",
+  "version": "1.0.0",
+  "description": "Escuta em segundo plano, Wi-Fi da lançadora e microfone do fone para o NockHug",
+  "main": "index.ts",
+  "license": "MIT",
+  "author": "NockHug",
+  "homepage": "https://github.com/2026-2-NCC6/Projeto6"
+}

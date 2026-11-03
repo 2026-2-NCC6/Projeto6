@@ -14,11 +14,11 @@ Tennis and ping-pong practitioners aged 13+ (13–17 with a guardian's consent) 
 
 ## Product Purpose
 
-NockHug is a ball launcher controlled by the practitioner's voice through the phone. The app prepares the session with a safety checklist, listens for a wake word followed by a command (liga, desliga, pausa, retoma), estimates balls per series, keeps an emergency stop always at hand, and turns every session into visible progress (XP, levels, day streak, achievements). Success: a full session run hands-free, stopped safely, and remembered.
+NockHug is a ball launcher controlled by the practitioner's voice through the phone. The app prepares the session with a safety checklist, listens for a wake word followed by a command (liga, desliga, pausa, retoma), estimates balls per series, keeps an emergency stop always at hand, and turns every session into visible progress (XP, levels, day streak, achievements). Each training carries its own motor velocity (Forte/Médio/Fraco or custom), the rest between series can be adjusted in place, and at the end of the rest the next series starts on its own after a 5-second beep warning unless the practitioner cancels with the wake word. Stopping stays reachable on every screen while a session is active, and the session only ends after the launcher confirms the motors stopped. Success: a full session run hands-free, stopped safely, and remembered.
 
 ## Positioning
 
-Voice-first control of a physical launcher with safety designed in: the machine only fires after the checklist arms it, "Para!" works without the wake word, and the launcher stops on its own after 3 s without the app.
+Voice-first control of a physical launcher with safety designed in: the machine only fires after the checklist arms it, "Para!" works without the wake word, and the launcher stops on its own after 4 s without the app.
 
 ## Operating Context
 
@@ -26,7 +26,7 @@ Used on court during training; Wi-Fi (the launcher's own access point) or Blueto
 
 ## Capabilities and Constraints
 
-Onboarding (7 steps), Home with streak and activity heatmap, training presets and custom trainings, voice session with rest between series, safe stop (hold 2 s to reset), result with XP, history, achievements, settings, calibration of seconds per ball, launcher connection. No sensor: ball counts are estimates. No website (out of scope by ADR 0003). Theme follows the system by default, with a manual override.
+Onboarding (7 steps), Home with streak and activity heatmap, training presets and custom trainings, a create/edit training sheet, per-training motor velocity (Forte 60/30, Médio 40/25, Fraco 30/20; custom lançador 0–100%, alimentador 15–40%) required on the first session of each built-in training, adjustable rest in the session, rest auto-resume with a 5-second beep warning and voice cancel, voice session, safe stop (hold 2 s to reset), result with XP, history, achievements, settings, calibration of seconds per ball at a chosen velocity, launcher connection with diagnostics and repair. No sensor: ball counts are estimates. No website (out of scope by ADR 0003). Theme follows the system by default, with a manual override. Every motor start (voice, button, resume, end of rest, calibration) waits for a 5-second beep countdown that the wake word plus "desliga"/"para" cancels. Voice keeps listening with the screen locked on both platforms (iOS background audio; Android foreground service with the "NockHug está ouvindo" notification), and a headset microphone is used when connected (Bluetooth via SCO on Android).
 
 ## Brand Commitments
 

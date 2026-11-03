@@ -1,0 +1,22 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <!-- Escuta com a tela apagada: serviço em primeiro plano do tipo microfone
+       (e dispositivo conectado, para o Wi-Fi/BLE da lançadora seguirem vivos). -->
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
+  <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+  <uses-permission android:name="android.permission.WAKE_LOCK" />
+  <!-- Prender o app ao Wi-Fi da lançadora (que não tem internet). -->
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+  <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+  <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+  <!-- Microfone do fone Bluetooth (SCO). -->
+  <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+
+  <application>
+    <service
+      android:name="expo.modules.nockhugnativo.EscutaService"
+      android:exported="false"
+      android:foregroundServiceType="microphone|connectedDevice" />
+  </application>
+</manifest>

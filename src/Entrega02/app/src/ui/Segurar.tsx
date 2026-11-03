@@ -26,6 +26,8 @@ export function Segurar({
 }) {
   const p = useSharedValue(0);
   const concluir = () => {
+    // Sem isso, o segundo toque curto acharia p=1 e confirmaria na hora.
+    p.set(0);
     haptico.sucesso();
     aoConcluir();
   };

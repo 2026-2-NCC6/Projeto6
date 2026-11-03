@@ -3,8 +3,11 @@
 // sem que nenhuma tela mude.
 
 import * as SQLite from 'expo-sqlite';
+import type { ItemFila } from '@/dados/sincronizacao';
 import type { IdConquista } from '@/dominio/gamificacao';
 import type { Configuracao, Perfil, Sessao, Treino } from '@/dominio/tipos';
+
+export type { ItemFila };
 
 export interface Repositorio {
   lerPerfil(): Promise<Perfil | null>;
@@ -20,6 +23,16 @@ export interface Repositorio {
   registrarConquistas(ids: IdConquista[], em: number): Promise<void>;
   exportar(): Promise<string>;
   apagarTudo(): Promise<void>;
+  listarFila(): Promise<ItemFila[]>;
+  gravarFila(item: ItemFila): Promise<void>;
+}
+
+function jsonOuNulo<T>(json: string): T | null {
+  try {
+    return JSON.parse(json) as T;
+  } catch {
+    return null;
+  }
 }
 
 const ESQUEMA = `
@@ -29,6 +42,14 @@ CREATE TABLE IF NOT EXISTS sessoes (id TEXT PRIMARY KEY NOT NULL, inicio INTEGER
 CREATE INDEX IF NOT EXISTS sessoes_inicio ON sessoes (inicio);
 CREATE TABLE IF NOT EXISTS treinos (id TEXT PRIMARY KEY NOT NULL, json TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS conquistas (id TEXT PRIMARY KEY NOT NULL, em INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS fila (
+  id TEXT PRIMARY KEY NOT NULL,
+  tipo TEXT NOT NULL,
+  json TEXT NOT NULL,
+  tentativas INTEGER NOT NULL,
+  estado TEXT NOT NULL,
+  ultimo_erro TEXT
+);
 `;
 
 export class RepositorioSqlite implements Repositorio {
@@ -44,7 +65,13 @@ export class RepositorioSqlite implements Repositorio {
 
   private async lerKv<T>(chave: string): Promise<T | null> {
     const r = await (await this.banco()).getFirstAsync<{ valor: string }>('SELECT valor FROM kv WHERE chave = ?', chave);
-    return r ? (JSON.parse(r.valor) as T) : null;
+    if (!r) return null;
+    try {
+      return JSON.parse(r.valor) as T;
+    } catch {
+      // Um registro corrompido não pode impedir o app de abrir.
+      return null;
+    }
   }
 
   private async gravarKv(chave: string, valor: unknown) {
@@ -58,7 +85,7 @@ export class RepositorioSqlite implements Repositorio {
 
   async listarSessoes(): Promise<Sessao[]> {
     const rs = await (await this.banco()).getAllAsync<{ json: string }>('SELECT json FROM sessoes ORDER BY inicio DESC');
-    return rs.map((r) => JSON.parse(r.json) as Sessao);
+    return rs.map((r) => jsonOuNulo<Sessao>(r.json)).filter((s): s is Sessao => !!s);
   }
 
   async salvarSessao(s: Sessao) {
@@ -66,12 +93,18 @@ export class RepositorioSqlite implements Repositorio {
   }
 
   async listarTreinos(): Promise<Treino[]> {
-    const rs = await (await this.banco()).getAllAsync<{ json: string }>('SELECT json FROM treinos');
-    return rs.map((r) => JSON.parse(r.json) as Treino);
+    // rowid preserva a ordem de criação mesmo depois de editar um treino.
+    const rs = await (await this.banco()).getAllAsync<{ json: string }>('SELECT json FROM treinos ORDER BY rowid');
+    return rs.map((r) => jsonOuNulo<Treino>(r.json)).filter((t): t is Treino => !!t);
   }
 
   async salvarTreino(t: Treino) {
-    await (await this.banco()).runAsync('INSERT OR REPLACE INTO treinos (id, json) VALUES (?, ?)', t.id, JSON.stringify(t));
+    // UPSERT (e não INSERT OR REPLACE) para editar sem trocar a posição na lista.
+    await (await this.banco()).runAsync(
+      'INSERT INTO treinos (id, json) VALUES (?, ?) ON CONFLICT(id) DO UPDATE SET json = excluded.json',
+      t.id,
+      JSON.stringify(t),
+    );
   }
 
   async apagarTreino(id: string) {
@@ -98,8 +131,28 @@ export class RepositorioSqlite implements Repositorio {
     return JSON.stringify({ exportadoEm: new Date().toISOString(), perfil, treinos, conquistas: Object.fromEntries(conquistas), sessoes }, null, 2);
   }
 
+  async listarFila(): Promise<ItemFila[]> {
+    const rs = await (await this.banco()).getAllAsync<{ id: string; tipo: string; json: string; tentativas: number; estado: ItemFila['estado']; ultimo_erro: string | null }>(
+      'SELECT id, tipo, json, tentativas, estado, ultimo_erro FROM fila',
+    );
+    return rs.map((r) => ({ id: r.id, tipo: r.tipo, json: r.json, tentativas: r.tentativas, estado: r.estado, ultimoErro: r.ultimo_erro }));
+  }
+
+  async gravarFila(item: ItemFila) {
+    await (await this.banco()).runAsync(
+      `INSERT INTO fila (id, tipo, json, tentativas, estado, ultimo_erro) VALUES (?, ?, ?, ?, ?, ?)
+       ON CONFLICT(id) DO UPDATE SET tipo = excluded.tipo, json = excluded.json, tentativas = excluded.tentativas, estado = excluded.estado, ultimo_erro = excluded.ultimo_erro`,
+      item.id,
+      item.tipo,
+      item.json,
+      item.tentativas,
+      item.estado,
+      item.ultimoErro,
+    );
+  }
+
   async apagarTudo() {
-    await (await this.banco()).execAsync('DELETE FROM kv; DELETE FROM sessoes; DELETE FROM treinos; DELETE FROM conquistas;');
+    await (await this.banco()).execAsync('DELETE FROM kv; DELETE FROM sessoes; DELETE FROM treinos; DELETE FROM conquistas; DELETE FROM fila;');
   }
 }
 

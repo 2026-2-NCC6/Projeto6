@@ -115,7 +115,7 @@ export function FormPerfil() {
           <Texto tamanho={16} peso="negrito">Meta semanal</Texto>
           <Texto tamanho={13} cor={c.textoSuave}>dias de treino por semana</Texto>
         </View>
-        <Passo rotulo="meta semanal" valor={r.metaSemanal} aoMenos={() => r.mudar({ metaSemanal: Math.max(1, r.metaSemanal - 1) })} aoMais={() => r.mudar({ metaSemanal: Math.min(7, r.metaSemanal + 1) })} />
+        <Passo rotulo="meta semanal" valor={r.metaSemanal} minimo={1} maximo={7} aoMenos={() => r.mudar({ metaSemanal: Math.max(1, r.metaSemanal - 1) })} aoMais={() => r.mudar({ metaSemanal: Math.min(7, r.metaSemanal + 1) })} />
       </View>
       {menor && <Caixa marcado={r.cienciaResponsavel} aoTrocar={() => r.mudar({ cienciaResponsavel: !r.cienciaResponsavel })} texto="Meu responsável sabe que vou usar o NockHug e concorda." />}
     </View>

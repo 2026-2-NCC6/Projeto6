@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { View } from 'react-native';
 import { bolasDaSessao, type Sessao } from '@/dominio/tipos';
+import { useApp } from '@/estado/app';
 import { Numero, Texto, Toque } from '@/ui/componentes';
 import { dia, hora, minutos } from '@/ui/formato';
 import * as Icone from '@/ui/icones';
@@ -8,7 +9,9 @@ import { useTema } from '@/ui/tema';
 
 export function ItemSessao({ s, comData = true }: { s: Sessao; comData?: boolean }) {
   const { c } = useTema();
+  const envio = useApp((st) => st.envios[s.id]);
   const bolas = bolasDaSessao(s);
+  const nuvem = envio === 'enviada' ? ' · na nuvem' : envio === 'pendente' ? ' · neste aparelho' : envio === 'conflito' ? ' · conflito ao enviar' : '';
   const parada = s.encerradaPor === 'parada_segura' || s.series.some((x) => x.motivo === 'emergencia');
   return (
     <Toque
@@ -31,7 +34,7 @@ export function ItemSessao({ s, comData = true }: { s: Sessao; comData?: boolean
           {hora(s.inicio)} · {s.series.length} {s.series.length === 1 ? 'série' : 'séries'} · {minutos(s.fim - s.inicio)}
         </Texto>
         <Texto tamanho={12} cor={c.textoFraco} linhas={1}>
-          {s.transporte === 'ble' ? 'Bluetooth' : s.transporte === 'simulada' ? 'Simulada' : 'Wi-Fi'}{parada ? ' · parada segura' : ''}
+          {s.transporte === 'ble' ? 'Bluetooth' : s.transporte === 'simulada' ? 'Simulada' : 'Wi-Fi'}{parada ? ' · parada segura' : ''}{nuvem}
         </Texto>
       </View>
       <View style={{ paddingHorizontal: 9, height: 26, borderRadius: 13, justifyContent: 'center', backgroundColor: c.begeSuave }}>

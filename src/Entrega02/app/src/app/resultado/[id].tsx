@@ -178,11 +178,11 @@ export default function Resultado() {
             {s.comandos.map((x, i) => (
               <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 7, borderTopWidth: i ? 1 : 0, borderTopColor: c.sutil }}>
                 <Texto tamanho={13} cor={c.textoFraco} estilo={{ width: 64, fontVariant: ['tabular-nums'] }}>{new Date(x.ts).toLocaleTimeString('pt-BR')}</Texto>
-                {x.origem === 'voz' ? <Icone.Microfone cor={c.textoFraco} tamanho={14} /> : <Icone.Alvo cor={c.textoFraco} tamanho={14} />}
-                <Texto tamanho={14} linhas={1} estilo={{ flex: 1, fontStyle: x.origem === 'voz' ? 'italic' : 'normal' }}>{x.origem === 'voz' ? `“${x.transcricao}”` : `botão ${x.comando}`}</Texto>
+                {x.origem === 'voz' ? <Icone.Microfone cor={c.textoFraco} tamanho={14} /> : x.origem === 'auto' ? <Icone.Relogio cor={c.textoFraco} tamanho={14} /> : <Icone.Alvo cor={c.textoFraco} tamanho={14} />}
+                <Texto tamanho={14} linhas={1} estilo={{ flex: 1, fontStyle: x.origem === 'voz' ? 'italic' : 'normal' }}>{x.origem === 'voz' ? `“${x.transcricao}”` : x.origem === 'auto' ? `automático ${x.comando}` : `botão ${x.comando}`}</Texto>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                   {x.aceito && <Icone.Check cor={c.destaque} tamanho={13} />}
-                  <Texto tamanho={13} peso="negrito" cor={x.aceito ? c.destaque : c.perigoTexto}>{x.aceito ? x.comando : (x.motivo ?? 'recusado')}</Texto>
+                  <Texto tamanho={13} peso="negrito" cor={x.aceito ? c.destaque : c.perigoTexto}>{x.aceito ? (x.motivo ?? x.comando) : (x.motivo ?? 'recusado')}</Texto>
                 </View>
               </View>
             ))}

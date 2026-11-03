@@ -159,3 +159,7 @@ GoogleService-Info.plist
 
 # Ferramentas de design locais (Impeccable)
 .impeccable/
+
+# Saída local de build e de teste
+**/android/build/
+test-results/

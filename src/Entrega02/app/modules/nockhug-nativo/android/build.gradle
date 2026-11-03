@@ -1,0 +1,15 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'br.edu.fecap.nockhug'
+version = '1.0.0'
+
+android {
+  namespace "expo.modules.nockhugnativo"
+  defaultConfig {
+    versionCode 1
+    versionName "1.0.0"
+  }
+}

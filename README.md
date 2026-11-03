@@ -21,12 +21,12 @@
   <img src="imagens/logo-nockhug.png" alt="Logo do NockHug: uma bola de tênis sorrindo que abraça a si mesma" width="240">
 </p>
 
-O **NockHug** é uma lançadora de bolas controlada **pela voz do praticante**, pelo celular. Quem treina com uma lançadora está em quadra, com a raquete na mão, e para pausar ou ajustar a máquina precisa largar o treino e atravessar a quadra. Com o NockHug, basta dizer a palavra de ativação seguida do comando: *"Nock, liga"*, *"Nock, pausa"*, *"Nock, retoma"*, *"desliga"*. A palavra de emergência *"Para!"* funciona a qualquer momento, sem palavra de ativação.
+O **NockHug** é uma lançadora de bolas controlada **pela voz do praticante**, pelo celular. Quem treina com uma lançadora está em quadra, com a raquete na mão, e para pausar ou ajustar a máquina precisa largar o treino e atravessar a quadra. Com o NockHug, basta dizer a palavra de ativação seguida do comando: *"Nock, liga"*, *"Nock, pausa"*, *"Nock, retoma"*, *"desliga"*. A palavra de emergência *"Para!"* funciona a qualquer momento, sem palavra de ativação. No fim do descanso, a próxima série começa sozinha depois de três bips de aviso — a menos que o praticante diga *"Nock, desliga"* ou *"Nock, para"*.
 
 O projeto é parte do tema **Smart Tennis Arena** (treinos gamificados de tênis com IoT, robótica e integração), em parceria com a Smart Tennis. Ele tem duas partes:
 
-- **A lançadora**: um ESP32 que comanda dois motores, a roda que arremessa a bola (14 000 RPM) e a base giratória que alimenta o cano (20 RPM). Ela recebe comandos por **Wi-Fi** (Access Point próprio) ou **Bluetooth Low Energy**, e para os motores sozinha se ficar 3 segundos sem notícias do app.
-- **O app mobile** (Android e iOS): prepara cada sessão com um checklist de segurança, reconhece a voz, conta as bolas estimadas de cada série, mantém um botão de parada de emergência sempre à mão e transforma cada treino em progresso visível (XP, níveis, sequência de dias e conquistas). Funciona sem internet e guarda tudo no próprio aparelho.
+- **A lançadora**: um ESP32 que comanda dois motores, a roda que arremessa a bola (14 000 RPM) e a base giratória que alimenta o cano (20 RPM). Ela recebe comandos por **Wi-Fi** (Access Point próprio) ou **Bluetooth Low Energy**, e para os motores sozinha se ficar 4 segundos sem notícias do app.
+- **O app mobile** (Android e iOS): prepara cada sessão com um checklist de segurança, reconhece a voz, conta as bolas estimadas de cada série, mantém um botão de parada de emergência sempre à mão e transforma cada treino em progresso visível (XP, níveis, sequência de dias e conquistas). Cada treino tem a própria velocidade dos motores (Forte, Médio, Fraco ou Personalizado), definida na primeira sessão e editável num sheet; o descanso pode ser ajustado na própria sessão e retoma sozinho com aviso sonoro. Funciona sem internet e guarda tudo no próprio aparelho.
 
 A segurança vem antes de tudo: a lançadora só aceita "liga" depois que o checklist a **arma**, e parar é sempre mais fácil que ligar.
 
@@ -43,7 +43,7 @@ A segurança vem antes de tudo: a lançadora só aceita "liga" depois que o chec
 Código-fonte por entrega:
 
 - [**Entrega 01**](src/Entrega01): firmware do ESP32 com controle por voz no navegador, senha forte no Access Point e token exigido para acionar os motores.
-- [**Entrega 02**](src/Entrega02): firmware v2 (máquina de estados com trava, Wi-Fi e Bluetooth ao mesmo tempo, watchdog e calibração) e o app mobile. O passo a passo detalhado está no [README da Entrega 02](src/Entrega02/README.md).
+- [**Entrega 02**](src/Entrega02): firmware v2.2 (máquina de estados com trava, Wi-Fi e Bluetooth ao mesmo tempo, watchdog, calibração e diagnóstico de recusa) e o app mobile (velocidade por treino, retomada do descanso, edição de treinos, voz com a tela apagada no iOS). O passo a passo detalhado está no [README da Entrega 02](src/Entrega02/README.md).
 
 ## 🛠 Estrutura de pastas
 

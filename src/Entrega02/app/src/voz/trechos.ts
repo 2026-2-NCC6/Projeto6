@@ -19,6 +19,15 @@ export class AcompanhadorDeTrechos {
     return this.tokens.slice(this.consumido).join(' ');
   }
 
+  // Trecho novo de uma transcrição ALTERNATIVA, medida contra o que já foi
+  // consumido da principal. Limitado às últimas palavras para uma hipótese
+  // mais longa não trazer um comando antigo de volta.
+  trechoDe(texto: string, maxTokens = 8): string {
+    const tokens = normalizar(texto).split(' ').filter(Boolean);
+    if (tokens.length <= this.consumido) return '';
+    return tokens.slice(this.consumido).slice(-maxTokens).join(' ');
+  }
+
   // Marca como tratado tudo o que chegou até agora.
   consumir() {
     this.consumido = this.tokens.length;

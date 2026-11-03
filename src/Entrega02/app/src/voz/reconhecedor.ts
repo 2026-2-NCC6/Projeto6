@@ -2,24 +2,39 @@
 // reconhecedor nativo da plataforma (Google no Android, Apple no iOS), na
 // nuvem quando há internet e no aparelho quando não há. Se a qualidade em
 // quadra não bastar, um ReconhecedorDeepgram entra aqui sem mexer nas telas.
+//
+// Escuta com a tela apagada: no iOS o app declara UIBackgroundModes audio e a
+// sessão playAndRecord do reconhecedor mantém o processo vivo. No Android não
+// existe um serviço em primeiro plano nesta biblioteca, então o sistema pode
+// pausar o microfone; o app tenta garantir a escuta ao voltar para a frente.
 
 import { ExpoSpeechRecognitionModule } from 'expo-speech-recognition';
 
 export type ModoReconhecimento = 'nuvem' | 'aparelho';
+export type PreferenciaReconhecimento = 'auto' | 'aparelho';
 
 export type OuvintesReconhecedor = {
-  aoTexto(texto: string, final: boolean): void;
+  aoTexto(texto: string, final: boolean, alternativas: string[]): void;
   aoErro(msg: string, fatal: boolean): void;
   aoMudarModo(modo: ModoReconhecimento): void;
   // A sessão de escuta acabou; a próxima transcrição começa do zero.
   aoFimDaEscuta(): void;
+  aoVolume?(nivel: number): void;
+};
+
+export type OpcoesEscuta = {
+  modo?: PreferenciaReconhecimento;
+  monitorarVolume?: boolean;
 };
 
 export interface ReconhecedorDeFala {
   pedirPermissao(): Promise<boolean>;
   temPermissao(): Promise<boolean>;
-  iniciar(contexto: string[], ouvintes: OuvintesReconhecedor): void;
+  iniciar(contexto: string[], ouvintes: OuvintesReconhecedor, opcoes?: OpcoesEscuta): void;
   parar(): void;
+  estaAtivo(): boolean;
+  estaEscutando(): boolean;
+  garantirEscuta(): void;
 }
 
 // Erros em que basta recomeçar a escuta.
@@ -27,11 +42,16 @@ const TRANSITORIOS = new Set(['no-speech', 'speech-timeout', 'nomatch', 'aborted
 
 export class ReconhecedorNativo implements ReconhecedorDeFala {
   private ativo = false;
+  private escutando = false;
   private modo: ModoReconhecimento = 'nuvem';
+  private modoPreferido: PreferenciaReconhecimento = 'auto';
+  private monitorarVolume = false;
   private subs: { remove(): void }[] = [];
   private contexto: string[] = [];
   private ouvintes: OuvintesReconhecedor | null = null;
   private religar: ReturnType<typeof setTimeout> | null = null;
+  private ultimoInicio = 0;
+  private recomecosSeguidos = 0;
 
   async pedirPermissao(): Promise<boolean> {
     const r = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
@@ -43,42 +63,89 @@ export class ReconhecedorNativo implements ReconhecedorDeFala {
     return r.granted;
   }
 
-  private comecar() {
-    const noAparelho = this.modo === 'aparelho';
-    ExpoSpeechRecognitionModule.start({
-      lang: 'pt-BR',
-      interimResults: true,
-      continuous: true,
-      maxAlternatives: 1,
-      addsPunctuation: false,
-      requiresOnDeviceRecognition: noAparelho,
-      contextualStrings: this.contexto,
-      iosTaskHint: 'confirmation',
-      // Grava e toca ao mesmo tempo: o retorno falado sai pelo alto-falante.
-      iosCategory: { category: 'playAndRecord', categoryOptions: ['defaultToSpeaker', 'allowBluetooth'], mode: 'measurement' },
-    });
+  estaAtivo() {
+    return this.ativo;
   }
 
+  estaEscutando() {
+    return this.escutando;
+  }
+
+  private comecar() {
+    const noAparelho = this.modo === 'aparelho';
+    this.ultimoInicio = Date.now();
+    try {
+      ExpoSpeechRecognitionModule.start({
+        lang: 'pt-BR',
+        interimResults: true,
+        continuous: true,
+        maxAlternatives: 3,
+        addsPunctuation: false,
+        requiresOnDeviceRecognition: noAparelho,
+        contextualStrings: this.contexto,
+        iosTaskHint: 'confirmation',
+        // Grava e toca ao mesmo tempo: o retorno falado e os bips saem pelo
+        // alto-falante, e o fone Bluetooth vira o microfone quando conectado.
+        iosCategory: {
+          category: 'playAndRecord',
+          categoryOptions: ['defaultToSpeaker', 'allowBluetooth', 'mixWithOthers'],
+          mode: 'measurement',
+        },
+        // Nível do microfone: só o teste de voz pede, para não re-renderizar a
+        // sessão inteira a cada 200 ms.
+        volumeChangeEventOptions: { enabled: this.monitorarVolume, intervalMillis: 200 },
+        ...(noAparelho ? { androidIntentOptions: { EXTRA_PREFER_OFFLINE: true } } : {}),
+      });
+    } catch (e) {
+      this.escutando = false;
+      this.ativo = false;
+      this.ouvintes?.aoErro(e instanceof Error ? e.message : 'O microfone não iniciou.', true);
+    }
+  }
+
+  // Se o sistema encerrou a escuta repetidamente, espera mais para não virar
+  // um laço de start/abort gastando bateria.
   private agendarRecomeco() {
     if (!this.ativo) return;
     if (this.religar) clearTimeout(this.religar);
-    this.religar = setTimeout(() => this.ativo && this.comecar(), 150);
+    const curto = Date.now() - this.ultimoInicio < 1200;
+    this.recomecosSeguidos = curto ? Math.min(this.recomecosSeguidos + 1, 5) : 0;
+    const atraso = 150 * 2 ** this.recomecosSeguidos;
+    this.religar = setTimeout(() => {
+      if (this.ativo) this.comecar();
+    }, atraso);
   }
 
-  iniciar(contexto: string[], ouvintes: OuvintesReconhecedor) {
+  iniciar(contexto: string[], ouvintes: OuvintesReconhecedor, opcoes?: OpcoesEscuta) {
     this.parar();
     this.ativo = true;
     this.contexto = contexto;
     this.ouvintes = ouvintes;
+    this.modoPreferido = opcoes?.modo ?? 'auto';
+    this.monitorarVolume = opcoes?.monitorarVolume === true;
+    this.modo = this.modoPreferido === 'aparelho' ? 'aparelho' : 'nuvem';
+    this.recomecosSeguidos = 0;
+
+    if (this.modo === 'aparelho' && !ExpoSpeechRecognitionModule.supportsOnDeviceRecognition()) {
+      this.modo = 'nuvem';
+      ouvintes.aoErro('Este celular não reconhece fala no aparelho. Usando a nuvem.', false);
+      ouvintes.aoMudarModo('nuvem');
+    }
+
     const M = ExpoSpeechRecognitionModule;
     this.subs = [
+      M.addListener('start', () => {
+        this.escutando = true;
+      }),
       M.addListener('result', (e) => {
-        const texto = e.results[0]?.transcript ?? '';
-        if (texto) this.ouvintes?.aoTexto(texto, e.isFinal);
+        this.recomecosSeguidos = 0;
+        const textos = e.results.map((r) => r.transcript).filter(Boolean);
+        if (textos.length) this.ouvintes?.aoTexto(textos[0], e.isFinal, textos);
       }),
       // O reconhecedor encerra sozinho depois de silêncio ou de cada frase em
       // alguns aparelhos; enquanto o microfone estiver ligado, recomeçamos.
       M.addListener('end', () => {
+        this.escutando = false;
         this.ouvintes?.aoFimDaEscuta();
         this.agendarRecomeco();
       }),
@@ -93,17 +160,37 @@ export class ReconhecedorNativo implements ReconhecedorDeFala {
           this.ativo = false;
           return;
         }
-        if (TRANSITORIOS.has(e.error)) return;
+        if (TRANSITORIOS.has(e.error)) {
+          this.escutando = false;
+          // Alguns aparelhos emitem o erro sem o 'end'; reage do mesmo jeito.
+          this.agendarRecomeco();
+          return;
+        }
         const fatal = e.error === 'not-allowed' || e.error === 'service-not-allowed' || e.error === 'audio-capture';
-        if (fatal) this.ativo = false;
+        if (fatal) {
+          this.ativo = false;
+          this.escutando = false;
+        }
         this.ouvintes?.aoErro(e.message || e.error, fatal);
       }),
+      ...(this.monitorarVolume
+        ? [M.addListener('volumechange', (e) => this.ouvintes?.aoVolume?.(e.value))]
+        : []),
     ];
     this.comecar();
   }
 
+  // Volta do segundo plano: se a intenção de ouvir continua e o sistema parou
+  // o reconhecedor, começa de novo sem esperar o próximo 'end'.
+  garantirEscuta() {
+    if (!this.ativo) return;
+    if (!this.escutando) this.agendarRecomeco();
+  }
+
   parar() {
     this.ativo = false;
+    this.escutando = false;
+    this.recomecosSeguidos = 0;
     if (this.religar) clearTimeout(this.religar);
     this.subs.forEach((s) => s.remove());
     this.subs = [];
