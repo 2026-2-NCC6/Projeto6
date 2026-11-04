@@ -37,16 +37,18 @@
 | ***Prompts* principais utilizados** | [preencher] |
 | **Trechos ou entregas afetadas** | [preencher] |
 
+
 ### Disciplina 4 — Redes de Computadores e Cibersegurança
 
-| **Aluno(s) Responsável(veis)** | [preencher] |
+| **Aluno(s) Responsável(veis)** | Yan Ramos Cezareto |
 | :--- | :--- |
-| **Ferramenta utilizada** | [preencher] |
-| **Versão/modelo** | [preencher] |
-| **Disciplina / Trabalho** | [preencher] |
-| **Finalidade de uso** | [preencher] |
-| ***Prompts* principais utilizados** | [preencher] |
-| **Trechos ou entregas afetadas** | [preencher] |
+| **Ferramenta utilizada** | Claude (Claude Code) e ChatGPT (OpenAI) |
+| **Versão/modelo** | Claude Opus 5.5 (claude-opus-5-5); ChatGPT GPT-6 |
+| **Disciplina / Trabalho** | Redes de Computadores e Cibersegurança — Entrega 01 |
+| **Finalidade de uso** | **Claude Opus 5.5:** preparação do firmware da Entrega 01 para publicação no repositório público, separando a senha do Access Point e o token em `segredos.h` (fora do Git), criando `segredos.exemplo.h` e ajustando o `.gitignore` para impedir o versionamento de credenciais. As mitigações iniciais de segurança foram implementadas em 22/09/2026, mas a ferramenta utilizada nessa implementação não foi confirmada. **ChatGPT GPT-6:** apoio à redação e revisão de partes do Relatório de Vulnerabilidades, abrangendo a descrição da arquitetura do ESP32, a identificação e análise dos riscos V1–V8, a classificação de probabilidade e impacto e a documentação dos controles iniciais de segurança, com revisão humana. |
+| ***Prompts* principais utilizados** | **Claude Opus 5.5:** "Pode fazer o commit e push antes. Confira se nenhuma key/credencial/secret/etc, estará nos commits, altere o .gitignore se necessário" (29/10/2026). **ChatGPT GPT-6:** solicitações para auxiliar na redação e revisão do relatório, descrever a arquitetura do protótipo, organizar as vulnerabilidades V1–V8 e apresentar os controles de segurança iniciais. Os pedidos do ChatGPT estão sintetizados, não transcritos literalmente. |
+| **Trechos ou entregas afetadas** | **Claude Opus 5.5:** `src/Entrega01/main.ino`, `src/Entrega01/segredos.exemplo.h` e `.gitignore` (commit `fde1170`). **ChatGPT GPT-6:** `Entrega01_Redes_Ciberseguranca.pdf`, incluindo trechos sobre a arquitetura do sistema, metodologia de análise, registro das vulnerabilidades V1–V8, matriz de probabilidade e impacto e controles de segurança iniciais. |
+
 
 ### Disciplina 5 — Inovação e Empreendedorismo
 
@@ -95,16 +97,18 @@
 | ***Prompts* principais utilizados** | [preencher] |
 | **Trechos ou entregas afetadas** | [preencher] |
 
+
 ### Disciplina 4 — Redes de Computadores e Cibersegurança
 
-| **Aluno(s) Responsável(veis)** | [preencher] |
+| **Aluno(s) Responsável(veis)** | Yan Ramos Cezareto |
 | :--- | :--- |
-| **Ferramenta utilizada** | [preencher] |
-| **Versão/modelo** | [preencher] |
-| **Disciplina / Trabalho** | [preencher] |
-| **Finalidade de uso** | [preencher] |
-| ***Prompts* principais utilizados** | [preencher] |
-| **Trechos ou entregas afetadas** | [preencher] |
+| **Ferramenta utilizada** | Claude (Claude Code), Cursor e ChatGPT (OpenAI) |
+| **Versão/modelo** | Claude Sonnet 5.5 (claude-sonnet-5-5); Cursor (Grok 4.7); ChatGPT GPT-6 |
+| **Disciplina / Trabalho** | Redes de Computadores e Cibersegurança — Entrega 02 |
+| **Finalidade de uso** | **Claude Sonnet 5.5:** revisão crítica do Plano de Respostas aos Riscos, verificando a coerência do conteúdo, o atendimento ao enunciado e possíveis inconsistências em relação ao código-fonte, produzindo um parecer separado sem alterar diretamente o relatório. **Cursor (Grok 4.7):** apoio à implementação do firmware 2.4.0 do ESP32, incluindo limitação de comandos, respostas HTTP 401 e 429, contadores de comandos recusados e configurações de identificação da rede. **ChatGPT GPT-6:** auxílio na elaboração, estruturação e revisão do Plano de Respostas aos Riscos com base no Relatório de Vulnerabilidades da Entrega 01 e no modelo disponibilizado pelo professor, abrangendo introdução, tabela de riscos V1–V8, oportunidade OPP-001, estratégias de resposta e monitoramento. As informações foram revisadas para distinguir controles implementados de ações planejadas. |
+| ***Prompts* principais utilizados** | **Claude Sonnet 5.5:** "Preciso revisar a entrega do meu colega, revise para mim." (02/11/2026); solicitação de avaliação do documento conforme o enunciado da disciplina, verificando escrita, coerência e atendimento às exigências do professor. **Cursor (Grok 4.7):** prompt principal não confirmado no histórico disponível. **ChatGPT GPT-6:** solicitações para estruturar o Plano de Respostas aos Riscos, revisar a classificação e o tratamento das vulnerabilidades, organizar ações, responsáveis, prazos e status, incluir a oportunidade OPP-001 e aprimorar a redação e a apresentação do relatório sem apresentar ações planejadas como testes concluídos. Os pedidos do ChatGPT estão sintetizados, não transcritos literalmente. |
+| **Trechos ou entregas afetadas** | **Claude Sonnet 5.5:** parecer de revisão e mensagem de retorno ao colega, sem edição direta do relatório. **Cursor (Grok 4.7):** `src/Entrega02/main.ino` (firmware 2.4.0). **ChatGPT GPT-6:** `NockHug_Plano_de_Riscos_Entrega_2_Revisado.pdf`, incluindo as seções 1 (Introdução), 2 (Tabela de Respostas aos Riscos), 2.1 (Oportunidade de Melhoria), 3 (Detalhamento das Estratégias de Resposta) e 4 (Monitoramento e Revisão), com apoio à redação, organização das tabelas e revisão do conteúdo. |
+
 
 ### Disciplina 5 — Inovação e Empreendedorismo
 
