@@ -2,7 +2,6 @@
 ### **DECLARAÇÃO DE USO DE INTELIGÊNCIA ARTIFICIAL**
 
 ## Entrega 1
-<br><br>
 
 ### Disciplina 1 — Projeto Interdisciplinar: IoT e Robótica
 
@@ -28,14 +27,14 @@
 
 ### Disciplina 3 — Teoria da Computação e Linguagens Formais
 
-| **Aluno(s) Responsável(veis)** | [preencher] |
+| **Aluno(s) Responsável(veis)** | Guilherme Fogolin |
 | :--- | :--- |
-| **Ferramenta utilizada** | [preencher] |
-| **Versão/modelo** | [preencher] |
-| **Disciplina / Trabalho** | [preencher] |
-| **Finalidade de uso** | [preencher] |
-| ***Prompts* principais utilizados** | [preencher] |
-| **Trechos ou entregas afetadas** | [preencher] |
+| **Ferramenta utilizada** | Claude |
+| **Versão/modelo** | Claude Sonnet 5 |
+| **Disciplina / Trabalho** | Teoria da Computação e Linguagens Formais, Entrega 01 (Modelagem Formal do Controle por Voz do projeto NockHug) |
+| **Finalidade de uso** | Estruturação e redação do relatório da atividade: definição e verificação dos autômatos (M1, sessão de controle por voz; M2, reconhecimento de comandos), das linguagens, expressões regulares e gramáticas correspondentes ao sistema descrito e diagramação do documento final em Word |
+| ***Prompts* principais utilizados** | - Descrição do projeto e pedido de confirmação do entendimento<br>- Envio dos 8 pontos da professora e dos relatórios de referência<br>- Pedido final para gerar o relatório completo em Word |
+| **Trechos ou entregas afetadas** | Relatório completo da Entrega 01 (seções 1 a 10: identificação dos estados, eventos, diagramas de estados, tabelas de transição, linguagem do sistema, expressões regulares, gramáticas, justificativa da modelagem, observações reflexivas e conclusão) |
 
 
 ### Disciplina 4 — Redes de Computadores e Cibersegurança
@@ -49,7 +48,6 @@
 | ***Prompts* principais utilizados** | **Claude Opus 5.5:** "Pode fazer o commit e push antes. Confira se nenhuma key/credencial/secret/etc, estará nos commits, altere o .gitignore se necessário" (29/10/2026). **ChatGPT GPT-6:** solicitações para auxiliar na redação e revisão do relatório, descrever a arquitetura do protótipo, organizar as vulnerabilidades V1–V8 e apresentar os controles de segurança iniciais. Os pedidos do ChatGPT estão sintetizados, não transcritos literalmente. |
 | **Trechos ou entregas afetadas** | **Claude Opus 5.5:** `src/Entrega01/main.ino`, `src/Entrega01/segredos.exemplo.h` e `.gitignore` (commit `fde1170`). **ChatGPT GPT-6:** `Entrega01_Redes_Ciberseguranca.pdf`, incluindo trechos sobre a arquitetura do sistema, metodologia de análise, registro das vulnerabilidades V1–V8, matriz de probabilidade e impacto e controles de segurança iniciais. |
 
-
 ### Disciplina 5 — Inovação e Empreendedorismo
 
 | **Aluno(s) Responsável(veis)** | [preencher] |
@@ -62,7 +60,6 @@
 | **Trechos ou entregas afetadas** | [preencher] |
 
 ## Entrega 2
-<br><br>
 
 ### Disciplina 1 — Projeto Interdisciplinar: IoT e Robótica
 
