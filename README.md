@@ -35,7 +35,7 @@ A segurança vem antes de tudo: a lançadora só aceita "liga" depois que o chec
 | Unidade curricular | Entrega 01 | Entrega 02 |
 |--------------------|------------|------------|
 | Projeto Interdisciplinar: IoT e Robótica | [Proposta técnica e backlog](documentos/Entrega01/PI_IoT_Robotica/Entrega01_PI_IoT_Robotica.pdf) | [Em andamento](documentos/Entrega02/PI_IoT_Robotica) |
-| Sistemas Embarcados e Robótica | [Montagem e testes do circuito](documentos/Entrega01/Sistemas_Embarcados_Robotica/Entrega01_Sistemas_Embarcados_Robotica.pdf) | [Em andamento](documentos/Entrega02/Sistemas_Embarcados_Robotica) |
+| Sistemas Embarcados e Robótica | [Montagem e testes do circuito](documentos/Entrega01/Sistemas_Embarcados_Robotica/Entrega01_Sistemas_Embarcados_Robotica.pdf) | [Relatório e vídeo do protótipo](documentos/Entrega02/Sistemas_Embarcados_Robotica/README.md) |
 | Teoria da Computação e Linguagens Formais | [Modelagem formal do controle por voz](documentos/Entrega01/Teoria_Computacao/Entrega01_Teoria_da_Computa%C3%A7%C3%A3o.pdf) | [Em andamento](documentos/Entrega02/Teoria_Computacao) |
 | Redes de Computadores e Cibersegurança | [Relatório de vulnerabilidades](documentos/Entrega01/Redes_Ciberseguranca/Entrega01_Redes_Ciberseguranca.pdf) | [Em andamento](documentos/Entrega02/Redes_Ciberseguranca) |
 | Inovação e Empreendedorismo | [Análise da oportunidade](documentos/Entrega01/Inovacao_Empreendedorismo/Entrega01_Inova%C3%A7%C3%A3o_Empreendedorismo.pdf) | [Em andamento](documentos/Entrega02/Inovacao_Empreendedorismo) |
