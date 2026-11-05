@@ -30,10 +30,10 @@
 | **Aluno(s) Responsável(veis)** | Guilherme Fogolin |
 | :--- | :--- |
 | **Ferramenta utilizada** | Claude |
-| **Versão/modelo** | Claude Sonnet 5 |
+| **Versão/modelo** | Claude Sonnet 5.5 |
 | **Disciplina / Trabalho** | Teoria da Computação e Linguagens Formais, Entrega 01 (Modelagem Formal do Controle por Voz do projeto NockHug) |
 | **Finalidade de uso** | Estruturação e redação do relatório da atividade: definição e verificação dos autômatos (M1, sessão de controle por voz; M2, reconhecimento de comandos), das linguagens, expressões regulares e gramáticas correspondentes ao sistema descrito e diagramação do documento final em Word |
-| ***Prompts* principais utilizados** | - Descrição do projeto e pedido de confirmação do entendimento<br>- Envio dos 8 pontos da professora e dos relatórios de referência<br>- Pedido final para gerar o relatório completo em Word |
+| ***Prompts* principais utilizados** | - Descrição do projeto e pedido de confirmação do entendimento;<br>- Envio dos 8 pontos da professora e dos relatórios de referência;<br>- Pedido final para gerar o relatório completo em Word |
 | **Trechos ou entregas afetadas** | Relatório completo da Entrega 01 (seções 1 a 10: identificação dos estados, eventos, diagramas de estados, tabelas de transição, linguagem do sistema, expressões regulares, gramáticas, justificativa da modelagem, observações reflexivas e conclusão) |
 
 
@@ -85,14 +85,14 @@
 
 ### Disciplina 3 — Teoria da Computação e Linguagens Formais
 
-| **Aluno(s) Responsável(veis)** | [preencher] |
+| **Aluno(s) Responsável(veis)** | Guilherme Fogolin |
 | :--- | :--- |
-| **Ferramenta utilizada** | [preencher] |
-| **Versão/modelo** | [preencher] |
-| **Disciplina / Trabalho** | [preencher] |
-| **Finalidade de uso** | [preencher] |
-| ***Prompts* principais utilizados** | [preencher] |
-| **Trechos ou entregas afetadas** | [preencher] |
+| **Ferramenta utilizada** | Claude |
+| **Versão/modelo** | Claude Sonnet 5.5 |
+| **Disciplina / Trabalho** | Teoria da Computação e Linguagens Formais, Entrega 02 (Documentação formal das regras de funcionamento do projeto NockHug) |
+| **Finalidade de uso** | Cruzar os anexos (Entregas 01 e 02 de Teoria, IoT e Empreendedorismo) e levantar lacunas em forma de perguntas. Depois, redigir o relatório em Word com base nas minhas respostas, no padrão da Entrega 01. Também gerou os diagramas (M1 revisada e M2) e formatou quadros, índice e capa. As decisões de projeto foram minhas: escopo, regras, valores e o que ficou de fora. |
+| ***Prompts* principais utilizados** | - Pedido para atuar como especialista em Linguagens Formais, analisar os anexos, mapear lacunas da Entrega 02 e fazer uma sessão de perguntas, sem redigir o relatório ainda;</br> - Respostas numeradas do grupo às perguntas, com as decisões: usar as duas camadas M1 e M2, descrever o sistema como implementado hoje, desconexão levando à parada segura, perda de sinal de cerca de 5 s e sem pontuação nem token;</br> - Instrução para gerar o relatório em Word com os três diagramas como imagem. |
+| **Trechos ou entregas afetadas** | Relatório da Entrega 02 em Word, com apresentação, seções 1 a 6 e conclusão, quadros, índice e os dois diagramas. Os trechos que mais dependeram da minha revisão são as regras R1 a R14, os termos-chave do reconhecedor M2 e o enquadramento de M1 como AFN-ε na Entrega 01 e AFD agora. |
 
 
 ### Disciplina 4 — Redes de Computadores e Cibersegurança
