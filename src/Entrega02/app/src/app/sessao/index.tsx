@@ -7,6 +7,7 @@
 // sessão. Tudo o que pode dar errado na lançadora vira um cartão com o que
 // fazer e o detalhe técnico.
 
+import * as Haptics from 'expo-haptics';
 import { useKeepAwake } from 'expo-keep-awake';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -14,9 +15,10 @@ import { Alert, BackHandler, ScrollView, View } from 'react-native';
 import Animated, { Easing, FadeIn, useAnimatedProps, useSharedValue, withTiming, ZoomIn } from 'react-native-reanimated';
 import Svg, { Circle } from 'react-native-svg';
 import { segundosRestantes, situacaoDescanso } from '@/dominio/descanso';
+import { fraseSegura } from '@/dominio/frases';
 import { CONTAGEM_MS, type Partida } from '@/dominio/partida';
 import { ehLivre, LIMITES } from '@/dominio/treinos';
-import type { OrigemComando } from '@/dominio/tipos';
+import { bolasDaSessao, type OrigemComando } from '@/dominio/tipos';
 import type { Comando } from '@/dominio/vocabulario';
 import { descreverVelocidade, pct } from '@/dominio/velocidade';
 import { useApp } from '@/estado/app';
@@ -24,7 +26,8 @@ import { useLancadora } from '@/lancadora/cliente';
 import type { EstadoLancadora } from '@/lancadora/contrato';
 import { repararLancadora } from '@/lancadora/manutencao';
 import { useSessao, type MotivoSemRetomada } from '@/sessao/sessao';
-import { usePartidaAgendada } from '@/sessao/usePartida';
+import { useAvisosDaSerie } from '@/sessao/useAvisos';
+import { contagemEmCurso, usePartidaAgendada } from '@/sessao/usePartida';
 import { CartaoFalha } from '@/telas/CartaoFalha';
 import { Barra, Botao, BotaoEmergencia, Cabecalho, Cartao, Negrito, Numero, Passo, Pilula, Pulso, Quadra, Tela, Texto, Titulo, Toque } from '@/ui/componentes';
 import { cronometro } from '@/ui/formato';
@@ -222,13 +225,16 @@ function Contagem({ partida, aoCancelar }: { partida: Partida; aoCancelar: () =>
   }, [partida.em, fracao]);
   const props = useAnimatedProps(() => ({ strokeDashoffset: comp * (1 - fracao.get()) }));
   const acao = partida.comando === 'retomar' ? 'Retomando' : 'Motores ligam';
+  // O leitor de tela fala este rótulo em voz alta: nada de "Nock, desliga"
+  // aqui, que o microfone tomaria por comando.
+  const rotulo = `${acao} em ${segundo} segundos. O botão Cancelar está logo abaixo.`;
 
   return (
     <View
       style={{ alignItems: 'center', gap: 12, paddingVertical: 2 }}
       accessible
       accessibilityLiveRegion="assertive"
-      accessibilityLabel={`${acao} em ${segundo} segundos. Diga Nock, desliga, ou toque em cancelar.`}
+      accessibilityLabel={rotulo}
     >
       <View style={{ width: 160, height: 160, alignItems: 'center', justifyContent: 'center' }}>
         <Svg width={160} height={160} style={{ position: 'absolute' }}>
@@ -261,6 +267,37 @@ function Contagem({ partida, aoCancelar }: { partida: Partida; aoCancelar: () =>
   );
 }
 
+// O fechamento do treino: depois da última série, o anel se fecha com o
+// check e a tela segue sozinha para o resultado (XP, conquistas). O tempo
+// cobre a frase "Série N de N concluída. Treino concluído".
+const CELEBRACAO_MS = 3200;
+
+function TreinoConcluido({ bolas, series }: { bolas: number; series: number }) {
+  const { c } = useTema();
+  return (
+    <Animated.View
+      entering={FadeIn.duration(260)}
+      accessibilityLiveRegion="assertive"
+      accessibilityLabel={`Treino concluído. ${series} séries, ${bolas} bolas. Abrindo o resultado.`}
+      style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 10, alignItems: 'center', justifyContent: 'center', gap: 18, backgroundColor: paleta.verde, paddingHorizontal: 32 }}
+    >
+      <Animated.View
+        entering={ZoomIn.delay(120).duration(420).easing(Easing.out(Easing.back(1.6)))}
+        style={{ width: 132, height: 132, borderRadius: 66, backgroundColor: paleta.limao, alignItems: 'center', justifyContent: 'center' }}
+      >
+        <Icone.Check cor={paleta.verde} tamanho={64} espessura={3.5} />
+      </Animated.View>
+      <Animated.View entering={FadeIn.delay(380).duration(320)} style={{ alignItems: 'center', gap: 6 }}>
+        <Titulo tamanho={30} cor={paleta.limao}>Treino concluído!</Titulo>
+        <Texto tamanho={17} cor={c.quadraTexto}>{series} {series === 1 ? 'série' : 'séries'} · {bolas} {bolas === 1 ? 'bola' : 'bolas'}</Texto>
+      </Animated.View>
+      <Animated.View entering={FadeIn.delay(900).duration(400)}>
+        <Texto tamanho={14} cor={c.quadraTextoSuave}>Calculando seu XP…</Texto>
+      </Animated.View>
+    </Animated.View>
+  );
+}
+
 export default function Sessao() {
   const { c } = useTema();
   const config = useApp((s) => s.config);
@@ -286,12 +323,20 @@ export default function Sessao() {
     modoReconhecimento: config.reconhecimento,
     manterEmSegundoPlano: config.escutaTelaBloqueada,
     sinalSonoro: config.bips,
+    microfone: config.microfone,
     aoComando: (cmd, t, ativada) => void aoComando(cmd, t, ativada),
     aoIgnorado: (_, motivo) => motivo === 'sem_ativacao' && mostrar(`Sem “${config.palavraAtivacao}”`, false),
   });
+  const vozFalar = voz.falar;
+  const palavra = config.palavraAtivacao;
   useEffect(() => {
-    falarRef.current = voz.falar;
-  }, [voz.falar]);
+    // Durante a contagem, os bips têm a vez: a frase aparece na tela, sem voz.
+    // Uma frase que o microfone tomaria por comando (dominio/frases.ts) também
+    // fica só na tela.
+    falarRef.current = (texto, ok) => {
+      if (!contagemEmCurso() && fraseSegura(texto, palavra)) vozFalar(texto, ok);
+    };
+  }, [vozFalar, palavra]);
 
   // O status da lançadora fecha séries, abre o descanso e anuncia.
   useEffect(
@@ -316,6 +361,10 @@ export default function Sessao() {
     mostrar,
     aoFalhar: (f) => useSessao.getState().registrarFalha(f),
   });
+
+  // Os 3 bips dos últimos segundos da série, os sinais de pausa e de fim e o
+  // "Faltam 10 segundos de descanso".
+  useAvisosDaSerie({ falar: (t, ok) => falarRef.current(t, ok), mostrar });
 
   const desligarVoz = voz.desligar;
   useEffect(() => {
@@ -391,6 +440,32 @@ export default function Sessao() {
       { text: 'Encerrar', style: 'destructive', onPress: () => void fazer() },
     ]);
   }, [concluido, voz]);
+
+  // Fim do treino: a última série terminou pelas próprias bolas e a lançadora
+  // confirmou ARMADO. O app comemora e encerra sozinho (mesmo caminho do
+  // botão, que só segue com os motores parados), sem esperar um toque: quem
+  // treina de fone não precisa pegar o celular, e o microfone para de
+  // registrar falas numa sessão que já acabou.
+  const [celebrando, setCelebrando] = useState(false);
+  const celebrou = useRef<string | null>(null);
+  const encerrarRef = useRef(encerrar);
+  useEffect(() => {
+    encerrarRef.current = encerrar;
+  }, [encerrar]);
+  const estadoAgora = conexao === 'desconectada' ? undefined : status?.estado;
+  useEffect(() => {
+    if (!concluido || !s.id || s.motivoSemRetomada !== 'concluido' || s.fase !== 'pronta' || estadoAgora !== 'ARMADO' || s.ultimaFalha) return;
+    if (celebrou.current === s.id) return;
+    celebrou.current = s.id;
+    setCelebrando(true);
+    void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    setTimeout(() => {
+      // Uma emergência ou falha no meio da comemoração vence: nada de navegar.
+      const atual = useSessao.getState();
+      if (atual.fase === 'pronta' && atual.motivoSemRetomada === 'concluido' && !atual.ultimaFalha) encerrarRef.current();
+      else setCelebrando(false);
+    }, CELEBRACAO_MS);
+  }, [concluido, s.id, s.motivoSemRetomada, s.fase, s.ultimaFalha, estadoAgora]);
 
   useEffect(() => {
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -633,6 +708,7 @@ export default function Sessao() {
         )}
         <BotaoEmergencia aoTocar={cmd('emergencia')} />
       </View>
+      {celebrando && <TreinoConcluido bolas={bolasDaSessao(s)} series={s.series.length} />}
     </Tela>
   );
 }

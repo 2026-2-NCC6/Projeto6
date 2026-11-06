@@ -11,6 +11,7 @@
 
 import { create } from 'zustand';
 import { novoAlvoDescanso, podeRetomarAutomaticamente } from '@/dominio/descanso';
+import { FRASE, fraseFimSerie, fraseInicioSerie } from '@/dominio/frases';
 import { xpDaSessao } from '@/dominio/gamificacao';
 import { cancelaPartida, CONTAGEM_MS, ehPartida, instanteDaPartida, type Partida } from '@/dominio/partida';
 import { clampDescanso, comVelocidade, ehLivre } from '@/dominio/treinos';
@@ -83,19 +84,19 @@ const OPERACAO: Record<Comando, Operacao> = {
   emergencia: 'emergencia',
 };
 
-// Frases do retorno falado. O app ouve a própria voz, então nenhuma pode
-// conter "para", "pare" ou "socorro" (emergência sem prefixo). As que contêm
-// outro comando só valeriam depois da palavra de ativação, que o app nunca diz.
+// Frases do retorno falado (dominio/frases.ts). O app ouve a própria voz:
+// nenhuma contém termo de comando, nem "para", "pare" ou "socorro". O "liga"
+// confirmado diz a série que começou ("Série 2 de 5"), montada na hora.
 const FRASE_OK: Record<Comando, string> = {
   ligar: 'Ligando',
-  desligar: 'Desligado',
-  pausar: 'Pausado',
-  retomar: 'Retomando',
-  emergencia: 'Parada segura',
+  desligar: FRASE.desligado,
+  pausar: FRASE.pausada,
+  retomar: FRASE.retomando,
+  emergencia: FRASE.paradaSegura,
 };
 
-const FRASE_CONTAGEM = 'Motores em 5 segundos';
-export const FRASE_CANCELADA = 'Partida cancelada';
+const FRASE_CONTAGEM = FRASE.contagem;
+export const FRASE_CANCELADA = FRASE.cancelada;
 
 function recusa(c: Comando, e: EstadoLancadora | undefined): string | null {
   if (c === 'emergencia') return null;
@@ -120,6 +121,13 @@ let proximaPartida = 0;
 // A série aberta pelo "liga" que foi desfeito logo em seguida (cancelamento
 // durante a partida) não conta como série do treino.
 let ignorarProximaSerie = false;
+// Um "desliga", "pausa" ou a emergência a caminho da lançadora: os bips do fim
+// da série calam já, sem esperar a resposta.
+let paradasEmVoo = 0;
+
+export function paradaEmCurso(): boolean {
+  return paradasEmVoo > 0;
+}
 
 // Estado "sem partida e sem descanso automático", usado em todo lugar que
 // precisa garantir que nenhum motor vai ligar sozinho.
@@ -206,7 +214,7 @@ export const useSessao = create<EstadoSessao>((set, get) => ({
 
   async executar(c, origem, transcricao = '', ativada = true) {
     const lanc = useLancadora.getState();
-    const estado = lanc.conexao === 'conectada' || lanc.conexao === 'perdida' ? lanc.status?.estado : undefined;
+    let estado = lanc.conexao === 'conectada' || lanc.conexao === 'perdida' ? lanc.status?.estado : undefined;
     const registrar = (aceito: boolean, motivo: string | null, latenciaMs: number | null, comando: Comando = c) =>
       set({ comandos: [...get().comandos, { ts: Date.now(), origem, transcricao, comando, aceito, motivo, latenciaMs }] });
 
@@ -223,7 +231,7 @@ export const useSessao = create<EstadoSessao>((set, get) => ({
       registrar(true, 'partida cancelada', null, c === 'emergencia' ? 'desligar' : c);
       // Pausada com um "retoma" agendado: o "desliga" também encerra a série.
       if (!(c === 'desligar' && estado === 'PAUSADO')) {
-        return { aceito: true, frase: frase ?? 'Nada para cancelar' };
+        return { aceito: true, frase: frase ?? FRASE.nadaACancelar };
       }
     }
 
@@ -231,11 +239,17 @@ export const useSessao = create<EstadoSessao>((set, get) => ({
     // curto até os motores pararem.
     if (c === 'emergencia') {
       set({ ...SEM_PARTIDA, partidaCancelada: true });
-      let r = await useLancadora.getState().enviarUrgente('emergencia');
-      if (r.codigo === 200 && r.status?.estado !== 'PARADA_SEGURA') {
-        // Sem o status no corpo (ou com um corpo estranho), confirma lendo.
-        const s = await useLancadora.getState().enviar('status');
-        if (s.status) r = { ...r, status: s.status };
+      paradasEmVoo++;
+      let r: Awaited<ReturnType<typeof lanc.enviarUrgente>>;
+      try {
+        r = await useLancadora.getState().enviarUrgente('emergencia');
+        if (r.codigo === 200 && r.status?.estado !== 'PARADA_SEGURA') {
+          // Sem o status no corpo (ou com um corpo estranho), confirma lendo.
+          const s = await useLancadora.getState().enviar('status');
+          if (s.status) r = { ...r, status: s.status };
+        }
+      } finally {
+        paradasEmVoo--;
       }
       if (r.codigo === 200 && r.status?.estado === 'PARADA_SEGURA') {
         registrar(true, null, r.latenciaMs);
@@ -252,16 +266,31 @@ export const useSessao = create<EstadoSessao>((set, get) => ({
             acao: 'tentar' as const,
           }
         : null;
-      registrar(false, falha?.titulo ?? 'Emergência não confirmada', r.latenciaMs);
+      registrar(false, falha?.titulo ?? 'Não confirmei a parada', r.latenciaMs);
       if (falha) set({ ultimaFalha: falha });
-      return { aceito: false, frase: falha?.titulo ?? 'Emergência não confirmada', falha: falha ?? undefined };
+      return { aceito: false, frase: falha?.titulo ?? 'Não confirmei a parada', falha: falha ?? undefined };
     }
 
+    // Parar espera o comando em curso (até 3 s) em vez de ser recusado com
+    // "Aguarde o comando anterior": "Nock, pausa… não, desliga" tem de parar.
+    // Fica depois do cancelamento da partida acima, que precisa agir na hora
+    // sobre um "liga" ainda a caminho. O estado é relido depois da espera.
+    if ((c === 'desligar' || c === 'pausar') && comandoEmVoo) {
+      const limite = Date.now() + 3000;
+      while (comandoEmVoo && Date.now() < limite) await espera(100);
+      const agora = useLancadora.getState();
+      estado = agora.conexao === 'conectada' || agora.conexao === 'perdida' ? agora.status?.estado : undefined;
+    }
     if (comandoEmVoo) return { aceito: false, frase: 'Aguarde o comando anterior' };
 
     // Trava no app (a lançadora confere de novo: ADR 0004).
     const concluido = c === 'ligar' && !!treino && !ehLivre(treino) && series.length >= treino.series;
-    const negado = concluido ? 'Treino concluído. Veja o resultado' : recusa(c, estado);
+    // Status atrasado: a sessão sabe que os motores estão girando, mas o último
+    // status ainda diz ARMADO/REPOUSO. O "desliga" vai assim mesmo: a
+    // lançadora confere e, se já estiver parada, só responde que não mudou.
+    const faseAgora = get().fase;
+    const statusAtrasado = c === 'desligar' && (faseAgora === 'lancando' || faseAgora === 'pausada') && (estado === 'ARMADO' || estado === 'REPOUSO');
+    const negado = concluido ? 'Treino concluído. Veja o resultado' : statusAtrasado ? null : recusa(c, estado);
     if (negado) {
       registrar(false, negado, null);
       return { aceito: false, frase: negado };
@@ -297,7 +326,10 @@ export const useSessao = create<EstadoSessao>((set, get) => ({
     // "Desliga" é intenção de parar: o descanso que vier depois não retoma
     // sozinho, mesmo que a resposta se perca e o status diga "série concluída".
     if (c === 'desligar') set({ paradaManual: true });
+    const parada = c === 'desligar' || c === 'pausar';
+    const seriesAntes = get().series.length;
     comandoEmVoo = true;
+    if (parada) paradasEmVoo++;
     try {
       const aindaValido = origem === 'auto' && ehPartida(c) ? () => !get().partidaCancelada && !get().encerrando : undefined;
       let r = await lanc.enviar(OPERACAO[c], arg, aindaValido);
@@ -336,9 +368,17 @@ export const useSessao = create<EstadoSessao>((set, get) => ({
         set({ inicioSerie: Date.now(), descansoAte: 0, descansoIniciadoEm: 0, ...SEM_PARTIDA, motivoSemRetomada: null, paradaManual: false, fase: 'lancando' });
       }
       if (r.status) get().aoStatus(r.status);
+      if (c === 'ligar') {
+        const t = get().treino;
+        return { aceito: true, frase: fraseInicioSerie(get().series.length + 1, t && !ehLivre(t) ? t.series : null) };
+      }
+      // O "desliga" fechou a série: a frase do fim da série (com o descanso)
+      // já foi dita pelo status. Um "Desligado" logo depois a cortaria.
+      if (c === 'desligar' && get().series.length > seriesAntes) return { aceito: true, frase: FRASE_OK[c], silencioso: true };
       return { aceito: true, frase: FRASE_OK[c] };
     } finally {
       comandoEmVoo = false;
+      if (parada) paradasEmVoo--;
     }
   },
 
@@ -401,14 +441,14 @@ export const useSessao = create<EstadoSessao>((set, get) => ({
     // Marca mesmo sem partida: um comando em voo precisa saber que a intenção
     // virou cancelar.
     set({ ...SEM_PARTIDA, partidaCancelada: true, ...(fase === 'descanso' ? { motivoSemRetomada: 'cancelada' as const } : {}) });
-    return havia ? FRASE_CANCELADA : 'A retomada já estava desligada';
+    return havia ? FRASE_CANCELADA : FRASE.retomadaJaDesligada;
   },
 
   fimDoDescanso() {
     const { fase } = get();
     if (fase !== 'descanso') return null;
     set({ fase: 'pronta', descansoAte: 0, descansoIniciadoEm: 0, ...SEM_PARTIDA, motivoSemRetomada: get().motivoSemRetomada ?? 'concluido' });
-    return 'Descanso encerrado';
+    return FRASE.descansoEncerrado;
   },
 
   falharPartida(falha) {
@@ -468,7 +508,7 @@ export const useSessao = create<EstadoSessao>((set, get) => ({
         return null;
       case 'PAUSADO':
         set({ fase: 'pausada', conexaoPerdida: s.motivo === 'conexao_perdida' });
-        return s.motivo === 'conexao_perdida' ? 'Conexão perdida. Motores parados' : contagemPerdida ? FRASE_CANCELADA : null;
+        return s.motivo === 'conexao_perdida' ? FRASE.conexaoPerdida : contagemPerdida ? FRASE_CANCELADA : null;
       case 'PARADA_SEGURA':
         if (estavaDisparando) fecharSerie('emergencia');
         set({ fase: 'parada', motivoSemRetomada: null });
@@ -484,7 +524,8 @@ export const useSessao = create<EstadoSessao>((set, get) => ({
           return null;
         }
         const motivo: MotivoFimSerie = s.motivo === 'serie_concluida' ? 'serie_concluida' : 'desligar';
-        fecharSerie(motivo);
+        const fechada = fecharSerie(motivo);
+        const fim = { n: fechada.indice, bolas: fechada.bolas, motivo, descansoS: treino.descansoS };
         if (get().encerrando) {
           // O praticante está encerrando: nada de descanso nem retomada.
           set({ fase: 'pronta', motivoSemRetomada: null, paradaManual: false, inicioSerie: 0 });
@@ -492,11 +533,11 @@ export const useSessao = create<EstadoSessao>((set, get) => ({
         }
         if (ehLivre(treino)) {
           set({ fase: 'pronta', motivoSemRetomada: null, paradaManual: false });
-          return null;
+          return fraseFimSerie({ ...fim, total: null, autoRetomar: false });
         }
         if (get().series.length >= treino.series) {
           set({ fase: 'pronta', motivoSemRetomada: 'concluido', paradaManual: false });
-          return 'Treino concluído';
+          return fraseFimSerie({ ...fim, n: treino.series, total: treino.series, autoRetomar: false });
         }
         const manual = get().paradaManual;
         const auto = !manual && podeRetomarAutomaticamente(motivo, useApp.getState().config.retomarSozinho);
@@ -513,12 +554,12 @@ export const useSessao = create<EstadoSessao>((set, get) => ({
           paradaManual: false,
           partidaCancelada: false,
         });
-        return auto ? 'Série concluída. Descanse: eu retomo no fim' : 'Série concluída. Descanse';
+        return fraseFimSerie({ ...fim, total: treino.series, autoRetomar: auto });
       }
       case 'REPOUSO': {
         if (estavaDisparando) fecharSerie('conexao_perdida');
         set({ fase: 'pronta', motivoSemRetomada: null, paradaManual: false });
-        return estavaDisparando ? 'A lançadora voltou ao repouso. Rearme antes de seguir' : contagemPerdida ? FRASE_CANCELADA : null;
+        return estavaDisparando ? FRASE.repouso : contagemPerdida ? FRASE_CANCELADA : null;
       }
       default:
         return null;

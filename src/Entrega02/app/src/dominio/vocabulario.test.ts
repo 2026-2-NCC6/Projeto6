@@ -1,4 +1,13 @@
-import { contemAtivacao, encontrarComando, escolherInterpretacao, interpretar, palavraDeAtivacaoValida, termosDeContexto } from './vocabulario';
+import {
+  contemAtivacao,
+  ehParada,
+  encontrarComando,
+  escolherInterpretacao,
+  filtrarRevisao,
+  interpretar,
+  palavraDeAtivacaoValida,
+  termosDeContexto,
+} from './vocabulario';
 
 const comando = (c: 'ligar' | 'desligar' | 'pausar' | 'retomar' | 'emergencia', ativada = true) => ({ tipo: 'comando', comando: c, ativada });
 
@@ -46,6 +55,76 @@ describe('interpretar', () => {
 
   it('reconhece variações comuns de transcrição dos comandos', () => {
     expect(interpretar('nock disliga', 'Nock', false)).toEqual(comando('desligar'));
+  });
+});
+
+describe('"Nock, desliga" com o motor ligado (transcrições reais)', () => {
+  // Como o reconhecedor do Android e do iPhone escreveram "Nock, desliga"
+  // com a lançadora disparando. Todas precisam parar a máquina.
+  const desliga = [
+    'Nock, desliga',
+    'NOCK DESLIGA',
+    'Nock desliga.',
+    'nock desligar',
+    'nock desliga aí',
+    'nock desligue',
+    'nock desligá',
+    'nock desligaa',
+    'nock desligando',
+    'nok desliga',
+    'noc desliga',
+    'nóqui desliga',
+    'knock desliga',
+    'nock hug desliga',
+    'nockdesliga',
+    // O motor abafa o "Nock": o reconhecedor completa com a palavra comum.
+    'não desliga',
+    'Não, desliga',
+    'nao desligar',
+    'no desliga',
+    'nokia desliga',
+    'nick desliga',
+    'rock desliga',
+    // A ativação grudada numa grafia conhecida.
+    'nocdesliga',
+    'knockdesliga',
+    'nokdesligar',
+    'naodesliga',
+    // "desliga" cortado ao meio: a metade "liga" não pode virar LIGAR.
+    'nock des liga',
+    'nock dis liga',
+    'nock dez ligar',
+  ];
+  it.each(desliga)('"%s" desliga', (fala) => {
+    expect(interpretar(fala, 'Nock', false)).toEqual(comando('desligar'));
+  });
+
+  it('a pausa também aceita a ativação abafada', () => {
+    expect(interpretar('não pausa', 'Nock', false)).toEqual(comando('pausar'));
+    expect(interpretar('nick pausa', 'Nock', false)).toEqual(comando('pausar'));
+  });
+
+  it('a ativação abafada nunca liga nem retoma: só para', () => {
+    for (const fala of ['não liga', 'nao ligar', 'no liga', 'nick liga', 'rock liga', 'nokia liga', 'não retoma', 'não continua', 'naoliga', 'nickliga']) {
+      expect({ fala, r: interpretar(fala, 'Nock', false).tipo }).toEqual({ fala, r: 'ignorado' });
+    }
+    expect(interpretar('não', 'Nock', false)).toEqual({ tipo: 'ignorado', motivo: 'nao_entendi' });
+  });
+
+  it('"desligado/desligada", que o app fala, não é comando nem com "não" na frente', () => {
+    expect(interpretar('não desligado', 'Nock', false).tipo).toBe('ignorado');
+    expect(interpretar('não está desligada', 'Nock', true).tipo).toBe('ignorado');
+  });
+
+  it('palavra personalizada: uma letra de diferença basta para parar, não para ligar', () => {
+    expect(interpretar('arema desliga', 'Arena', false)).toEqual(comando('desligar'));
+    expect(interpretar('bia desliga', 'Lia', false)).toEqual(comando('desligar'));
+    expect(interpretar('bia liga', 'Lia', false)).toEqual({ tipo: 'ignorado', motivo: 'sem_ativacao' });
+  });
+
+  it('desliga sem nada parecido com a ativação continua exigindo "Nock"', () => {
+    expect(interpretar('desliga', 'Nock', false)).toEqual({ tipo: 'ignorado', motivo: 'sem_ativacao' });
+    expect(interpretar('bola desliga', 'Nock', false)).toEqual({ tipo: 'ignorado', motivo: 'sem_ativacao' });
   });
 });
 
@@ -133,6 +212,46 @@ describe('escolherInterpretacao', () => {
   });
 });
 
+describe('ehParada', () => {
+  it('emergência, desliga e pausa saem já no parcial; ligar e retomar esperam', () => {
+    expect(ehParada(escolherInterpretacao(['nock desliga'], 'Nock', false))).toBe(true);
+    expect(ehParada(escolherInterpretacao(['não desliga'], 'Nock', false))).toBe(true);
+    expect(ehParada(escolherInterpretacao(['nock pausa'], 'Nock', false))).toBe(true);
+    expect(ehParada(escolherInterpretacao(['para'], 'Nock', false))).toBe(true);
+    expect(ehParada(escolherInterpretacao(['nock liga'], 'Nock', false))).toBe(false);
+    expect(ehParada(escolherInterpretacao(['nock retoma'], 'Nock', false))).toBe(false);
+    expect(ehParada(escolherInterpretacao(['nock'], 'Nock', false))).toBe(false);
+  });
+});
+
+describe('filtrarRevisao', () => {
+  const revisto = (textos: string[], substituido: string) => filtrarRevisao(escolherInterpretacao(textos, 'Nock', false), substituido, 'Nock').resultado;
+
+  it('ruído já tratado reescrito como "nock desliga" para a máquina', () => {
+    expect(revisto(['nock desliga'], 'a e')).toEqual(comando('desligar'));
+    expect(revisto(['nock para'], 'o')).toEqual(comando('emergencia'));
+  });
+
+  it('o mesmo comando só reescrito não sai de novo', () => {
+    expect(revisto(['knock desliga'], 'nock desliga')).toEqual({ tipo: 'ignorado', motivo: 'nao_entendi' });
+    expect(revisto(['nock desligar'], 'nock desliga')).toEqual({ tipo: 'ignorado', motivo: 'nao_entendi' });
+  });
+
+  it('um segundo "desliga" junto da revisão ainda vale', () => {
+    expect(revisto(['knock desliga nock desliga'], 'nock desliga')).toEqual(comando('desligar'));
+  });
+
+  it('revisão nunca liga nem retoma', () => {
+    expect(revisto(['knock liga'], 'nock liga')).toEqual({ tipo: 'ignorado', motivo: 'nao_entendi' });
+    expect(revisto(['nock liga'], 'a e')).toEqual({ tipo: 'ignorado', motivo: 'nao_entendi' });
+    expect(revisto(['nock retoma'], 'o')).toEqual({ tipo: 'ignorado', motivo: 'nao_entendi' });
+  });
+
+  it('a ativação reescrita ainda abre a janela', () => {
+    expect(revisto(['a nock'], 'e')).toEqual({ tipo: 'ativacao' });
+  });
+});
+
 describe('prioridade do lado seguro', () => {
   it('"desliga" nunca é lido como "liga"', () => {
     expect(encontrarComando('nock desliga')).toBe('desligar');
@@ -175,6 +294,9 @@ describe('termosDeContexto', () => {
     expect(termos).toContain('Nock');
     expect(termos).toContain('desliga');
     expect(termos).toContain('nockhug');
+    expect(termos).toContain('Nock desliga');
+    expect(termos).toContain('Nock para');
+    expect(termos).not.toContain('Nock liga');
     expect(new Set(termos).size).toBe(termos.length);
   });
 });

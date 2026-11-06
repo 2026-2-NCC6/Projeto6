@@ -17,6 +17,7 @@ import { apagarToken } from '@/dados/segredos';
 import { useApp } from '@/estado/app';
 import { carregarRascunho } from '@/estado/onboarding';
 import { useLancadora } from '@/lancadora/cliente';
+import { foneBluetoothDisponivel } from '@/plataforma/nativo';
 import { Campo } from '@/telas/FormPerfil';
 import { Avatar, Botao, Cabecalho, Divisor, Grupo, Interruptor, Rotulo, Segmentos, Tela, Texto, Toque } from '@/ui/componentes';
 import * as Icone from '@/ui/icones';
@@ -63,6 +64,13 @@ export default function Configuracoes() {
   const [erroPlataforma, setErroPlataforma] = useState('');
   const [ocupadoPlataforma, setOcupadoPlataforma] = useState(false);
   const [sincronizando, setSincronizando] = useState(false);
+  // Fone Bluetooth com microfone conectado agora (para mostrar o nome dele na
+  // escolha do microfone). Relido a cada 3 s: o fone pode conectar com a tela aberta.
+  const [fone, setFone] = useState<string | null>(() => foneBluetoothDisponivel());
+  useEffect(() => {
+    const t = setInterval(() => setFone(foneBluetoothDisponivel()), 3000);
+    return () => clearInterval(t);
+  }, []);
   const travaPlataforma = useRef(false);
   const travaSync = useRef(false);
 
@@ -169,8 +177,8 @@ export default function Configuracoes() {
           <Interruptor rotulo="Retorno falado" sub="O app confirma cada comando em voz alta" ligado={config.retornoFalado} aoTrocar={() => void atualizarConfig({ retornoFalado: !config.retornoFalado })} />
           <Divisor />
           <Interruptor
-            rotulo="Toque de ativação"
-            sub="Um toque curto quando o app ouve a palavra. Os 5 bips antes de os motores ligarem tocam sempre."
+            rotulo="Sinais sonoros"
+            sub="Toque ao ouvir a palavra, 3 bips graves antes do fim da série e sinais de pausa e de fim. Os 5 bips antes de os motores ligarem tocam sempre."
             ligado={config.bips}
             aoTrocar={() => void atualizarConfig({ bips: !config.bips })}
           />
@@ -188,6 +196,28 @@ export default function Configuracoes() {
             </Texto>
           </View>
           <Divisor />
+          <View style={{ paddingHorizontal: 16, paddingVertical: 10, gap: 8 }}>
+            <Texto tamanho={16} peso="medio">Microfone</Texto>
+            <Segmentos
+              opcoes={[['fone', 'Fone Bluetooth'], ['celular', 'Do celular']]}
+              valor={config.microfone}
+              aoMudar={(microfone) => void atualizarConfig({ microfone })}
+              altura={38}
+            />
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Icone.Bluetooth cor={fone ? c.destaque : c.textoFraco} tamanho={14} />
+              <Texto tamanho={12} peso="semi" cor={fone ? c.texto : c.textoFraco} linhas={1} estilo={{ flex: 1 }}>
+                {fone ? `Conectado: ${fone}` : 'Nenhum fone Bluetooth conectado'}
+              </Texto>
+            </View>
+            <Texto tamanho={12} cor={c.textoSuave}>
+              {config.microfone === 'fone'
+                ? 'O app ouve pelo microfone do fone. Sem fone conectado, usa o do celular.'
+                : 'O app ouve sempre pelo microfone do celular, mesmo com um fone conectado.'}{' '}
+              A conexão Bluetooth com a lançadora continua funcionando nos dois casos.
+            </Texto>
+          </View>
+          <Divisor />
           <Linha
             titulo="Testar microfone"
             sub="Veja o que o app ouve e qual comando entende"
@@ -197,7 +227,7 @@ export default function Configuracoes() {
           <Divisor />
           <Interruptor
             rotulo="Escuta com a tela apagada"
-            sub="Continua ouvindo com o celular no bolso. No Android aparece a notificação “NockHug está ouvindo” enquanto a sessão estiver aberta. Com fone, o microfone dele é usado."
+            sub="Continua ouvindo com o celular no bolso. No Android aparece a notificação “NockHug está ouvindo” enquanto a sessão estiver aberta."
             ligado={config.escutaTelaBloqueada}
             aoTrocar={() => void atualizarConfig({ escutaTelaBloqueada: !config.escutaTelaBloqueada })}
           />

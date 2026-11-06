@@ -14,6 +14,8 @@ type Modulo = {
   desvincularWifi(): void;
   usarMicrofoneDoFone(ligar: boolean): string | null;
   entradaDeAudio(): EntradaDeAudio;
+  foneBluetoothDisponivel(): string | null;
+  preferirMicrofoneDoCelular(ligar: boolean): void;
 };
 
 const nativo = requireOptionalNativeModule<Modulo>('NockhugNativo');
@@ -52,4 +54,15 @@ export function usarMicrofoneDoFone(ligar: boolean): string | null {
 export function entradaDeAudio(): EntradaDeAudio {
   const e = seguro<EntradaDeAudio | null>(() => nativo!.entradaDeAudio(), null);
   return e && (e.tipo === 'fone_bt' || e.tipo === 'fone_fio' || e.tipo === 'celular') ? { tipo: e.tipo, nome: e.nome ?? null } : { tipo: 'celular', nome: null };
+}
+
+// Nome do fone Bluetooth com microfone conectado agora, sem passar a usá-lo.
+export function foneBluetoothDisponivel(): string | null {
+  return seguro(() => nativo!.foneBluetoothDisponivel() ?? null, null);
+}
+
+// Força o microfone do celular mesmo com um fone conectado (ou devolve a
+// escolha ao sistema, com false).
+export function preferirMicrofoneDoCelular(ligar: boolean): void {
+  seguro(() => nativo!.preferirMicrofoneDoCelular(ligar), undefined);
 }

@@ -50,3 +50,16 @@ export function avisoComAntecedencia(avisoEm: number, agora: number, antecedenci
 export function segundosRestantes(alvo: number, agora: number): number {
   return Math.max(0, Math.ceil((alvo - agora) / 1000));
 }
+
+// Aviso falado "Faltam 10 segundos de descanso": só em descansos de 20 s ou
+// mais (num mais curto, a frase de início ainda estaria tocando) e só até 7 s
+// do fim. Depois disso vem a contagem de partida, e a fala cobriria os bips.
+export const AVISO_DESCANSO_SEGUNDOS = 10;
+export const AVISO_DESCANSO_MS = AVISO_DESCANSO_SEGUNDOS * 1000;
+export const DESCANSO_MINIMO_AVISO_MS = 2 * AVISO_DESCANSO_MS;
+const FIM_JANELA_AVISO_MS = AVISO_MS + 2000;
+
+export function avisoDeDescansoDevido(restanteMs: number, totalMs: number, jaAvisou: boolean): boolean {
+  if (jaAvisou || totalMs < DESCANSO_MINIMO_AVISO_MS) return false;
+  return restanteMs <= AVISO_DESCANSO_MS && restanteMs > FIM_JANELA_AVISO_MS;
+}

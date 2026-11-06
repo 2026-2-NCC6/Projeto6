@@ -8,7 +8,7 @@
 import * as Haptics from 'expo-haptics';
 import { avisoComAntecedencia, decidirFimDoDescanso } from '@/dominio/descanso';
 import { bipDevido, CONTAGEM_MS } from '@/dominio/partida';
-import { tocarBip } from './sons';
+import { renovarBips, tocarBip } from './sons';
 
 type Opcoes = { aoSegundo(segundo: number): void; aoFim(): void; aoExpirar(): void };
 
@@ -24,7 +24,10 @@ export function iniciarContagem({ aoSegundo, aoFim, aoExpirar }: Opcoes): () => 
     const s = bipDevido(resta, ultimo);
     if (s !== null) {
       ultimo = s;
-      if (!primeiroBipEm) primeiroBipEm = agora;
+      if (!primeiroBipEm) {
+        primeiroBipEm = agora;
+        renovarBips();
+      }
       tocarBip('contagem');
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       aoSegundo(s);

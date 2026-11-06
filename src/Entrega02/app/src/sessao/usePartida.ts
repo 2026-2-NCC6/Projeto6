@@ -9,9 +9,10 @@
 // comando de novo.
 
 import * as Haptics from 'expo-haptics';
+import * as Speech from 'expo-speech';
 import { useEffect, useRef } from 'react';
 import { AccessibilityInfo } from 'react-native';
-import { bipsDisponiveis, tocarBip } from '@/audio/sons';
+import { bipsDisponiveis, renovarBips, tocarBip } from '@/audio/sons';
 import { avisoComAntecedencia, decidirFimDoDescanso } from '@/dominio/descanso';
 import { bipDevido, CONTAGEM_MS } from '@/dominio/partida';
 import type { FalhaLancadora } from '@/lancadora/falhas';
@@ -24,6 +25,14 @@ type Opcoes = {
 };
 
 const TICK_MS = 200;
+
+// Há uma contagem tocando (ou prestes a tocar): o retorno falado espera, para
+// não cobrir os bips. Cancelamentos e falhas apagam a partida antes de falar,
+// então continuam sendo anunciados.
+export function contagemEmCurso(agora = Date.now()): boolean {
+  const p = useSessao.getState().partida;
+  return !!p && p.em - agora <= CONTAGEM_MS + 1000;
+}
 
 export function usePartidaAgendada(opcoes: Opcoes) {
   const ref = useRef(opcoes);
@@ -88,10 +97,17 @@ export function usePartidaAgendada(opcoes: Opcoes) {
         marca.ultimoSegundo = segundo;
         if (!marca.primeiroBipEm) {
           marca.primeiroBipEm = agora;
-          // Sem comandos na frase: o microfone pode ouvir o alto-falante.
-          AccessibilityInfo.announceForAccessibility('Motores ligam em 5 segundos. Diga Nock, desliga ou toque em cancelar.');
+          // Players novos a cada contagem (um player quebrado numa troca de
+          // rota de áudio tocaria mudo) e nenhuma fala por cima dos bips.
+          renovarBips();
+          Speech.stop();
+          // Sem comandos na frase: o microfone pode ouvir o leitor de tela
+          // (um "Nock, desliga" dito por ele cancelaria a própria contagem).
+          AccessibilityInfo.announceForAccessibility('Motores ligam em 5 segundos. O botão Cancelar está na tela.');
           // Sem o módulo de áudio, a voz faz o papel dos bips.
-          if (!bipsDisponiveis()) ref.current.falar('Atenção, cinco segundos', true);
+          // Fala direto: o retorno falado da sessão fica mudo durante a
+          // contagem, e este aviso é o próprio aviso da contagem.
+          if (!bipsDisponiveis()) Speech.speak('Atenção, cinco segundos', { language: 'pt-BR' });
         }
         tocarBip('contagem');
         void Haptics.impactAsync(segundo <= 2 ? Haptics.ImpactFeedbackStyle.Heavy : Haptics.ImpactFeedbackStyle.Medium);

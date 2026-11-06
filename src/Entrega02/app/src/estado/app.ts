@@ -24,6 +24,8 @@ export const CONFIG_PADRAO: Configuracao = {
   bips: true,
   retomarSozinho: true,
   reconhecimento: 'auto',
+  // O comportamento das versões anteriores: com fone conectado, usa o dele.
+  microfone: 'fone',
 };
 
 type EstadoApp = {
@@ -73,6 +75,7 @@ function normalizarConfig(bruto: unknown): Configuracao {
     tema,
     palavraAtivacao: typeof resto.palavraAtivacao === 'string' ? resto.palavraAtivacao.trim() || 'Nock' : 'Nock',
     reconhecimento: resto.reconhecimento === 'aparelho' ? 'aparelho' : 'auto',
+    microfone: resto.microfone === 'celular' ? 'celular' : 'fone',
     transportePadrao: resto.transportePadrao === 'ble' ? 'ble' : 'wifi',
     dispositivoBle,
     modoDemonstracao: bool(resto.modoDemonstracao, CONFIG_PADRAO.modoDemonstracao),

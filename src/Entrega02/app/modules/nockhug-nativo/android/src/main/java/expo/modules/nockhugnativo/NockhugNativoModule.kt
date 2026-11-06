@@ -96,6 +96,32 @@ class NockhugNativoModule : Module() {
       }
     }
 
+    // Nome do fone Bluetooth com microfone conectado agora, sem ligar o canal
+    // dele (a tela de Configurações só mostra o que está disponível). null se
+    // não há nenhum. O fone usa o Bluetooth clássico (HFP); a lançadora usa o
+    // BLE, então os dois funcionam ao mesmo tempo.
+    Function("foneBluetoothDisponivel") {
+      val am = contexto.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+      try {
+        val fone = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+          am.availableCommunicationDevices.firstOrNull {
+            it.type == AudioDeviceInfo.TYPE_BLUETOOTH_SCO || it.type == AudioDeviceInfo.TYPE_BLE_HEADSET
+          }
+        } else {
+          am.getDevices(AudioManager.GET_DEVICES_INPUTS).firstOrNull { it.type == AudioDeviceInfo.TYPE_BLUETOOTH_SCO }
+        }
+        fone?.let { it.productName?.toString()?.takeIf { n -> n.isNotBlank() } ?: "Fone Bluetooth" }
+      } catch (e: Exception) {
+        null
+      }
+    }
+
+    // No Android o microfone do celular já é o padrão sem o canal SCO: basta
+    // soltar o fone. Existe para o JavaScript ser o mesmo nas duas plataformas.
+    Function("preferirMicrofoneDoCelular") { ligar: Boolean ->
+      if (ligar) soltarSco(contexto.getSystemService(Context.AUDIO_SERVICE) as AudioManager)
+    }
+
     // De onde o áudio está vindo agora: fone Bluetooth, fone com fio/USB ou o
     // microfone do celular.
     Function("entradaDeAudio") {

@@ -1,6 +1,6 @@
 import { repositorio } from '@/dados/repositorio';
 import { apagarJwtPlataforma, lerJwtPlataforma, salvarJwtPlataforma } from '@/dados/segredos';
-import { marcarEnvio, mesclarTreinos, pendentes, type ItemFila, type ResultadoEnvio } from '@/dados/sincronizacao';
+import { marcarEnvio, mesclarTreinos, pendentes, sessoesForaDaFila, type ItemFila, type ResultadoEnvio } from '@/dados/sincronizacao';
 import { sanitizarTreino } from '@/dominio/treinos';
 import type { Sessao, Treino } from '@/dominio/tipos';
 
@@ -153,6 +153,11 @@ export async function sincronizarPlataforma(): Promise<ResultadoSincronizacao> {
     const token = await lerJwtPlataforma();
     const conta = token ? jsonDoToken(token) : null;
     if (token && conta?.papel === 'praticante') {
+      // O histórico deste aparelho que ainda não foi para a nuvem sobe junto.
+      for (const novo of sessoesForaDaFila(await repositorio.listarSessoes(), fila)) {
+        await repositorio.gravarFila(novo);
+        fila = [...fila, novo];
+      }
       for (const item of pendentes(fila)) {
         if (item.tipo !== 'sessao') continue;
         const resultado = await enviarUm(base, token, item);

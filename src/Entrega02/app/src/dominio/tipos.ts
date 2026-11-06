@@ -33,13 +33,20 @@ export type Configuracao = {
   escutaTelaBloqueada: boolean;
   // Mantém a tela acesa durante a sessão (desligue para treinar com o celular no bolso).
   manterTelaAcesa: boolean;
-  // Bips antes de os motores ligarem e ao reconhecer a palavra de ativação.
+  // Sinais sonoros que não são de segurança: o toque da palavra de ativação,
+  // os 3 bips do fim da série e os sinais de pausa e de fim. A contagem antes
+  // de os motores ligarem toca sempre.
   bips: boolean;
   // Retoma a série sozinho no fim do descanso (a menos que o praticante cancele).
   retomarSozinho: boolean;
   // Nuvem quando há internet, no aparelho quando não há; ou sempre no aparelho.
   reconhecimento: 'auto' | 'aparelho';
+  // De onde vem a voz: o microfone do fone Bluetooth (quando há um conectado;
+  // sem fone, cai para o celular) ou sempre o microfone do celular.
+  microfone: PreferenciaMicrofone;
 };
+
+export type PreferenciaMicrofone = 'fone' | 'celular';
 
 // Duty PWM de cada motor, de 0 a 255 (o app mostra e escolhe em %).
 export type Velocidade = { lancador: number; alimentador: number };

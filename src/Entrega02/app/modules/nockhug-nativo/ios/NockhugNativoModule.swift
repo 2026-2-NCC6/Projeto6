@@ -25,6 +25,18 @@ public class NockhugNativoModule: Module {
       AVAudioSession.sharedInstance().currentRoute.inputs.first { NockhugNativoModule.ehFoneBluetooth($0.portType) }?.portName
     }
 
+    Function("foneBluetoothDisponivel") { () -> String? in
+      AVAudioSession.sharedInstance().availableInputs?.first { NockhugNativoModule.ehFoneBluetooth($0.portType) }?.portName
+    }
+
+    // Com o fone conectado, o iOS usa o microfone dele sozinho. Para ouvir
+    // pelo celular, o app pede a entrada embutida como preferida.
+    Function("preferirMicrofoneDoCelular") { (ligar: Bool) in
+      let sessao = AVAudioSession.sharedInstance()
+      let embutido = ligar ? sessao.availableInputs?.first { $0.portType == .builtInMic } : nil
+      try? sessao.setPreferredInput(embutido)
+    }
+
     Function("entradaDeAudio") { () -> [String: Any?] in
       guard let entrada = AVAudioSession.sharedInstance().currentRoute.inputs.first else {
         return ["tipo": "celular", "nome": nil]

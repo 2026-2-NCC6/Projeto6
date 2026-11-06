@@ -1,5 +1,5 @@
-import type { Treino } from '@/dominio/tipos';
-import { marcarEnvio, mesclarTreinos, pendentes, type ItemFila } from './sincronizacao';
+import type { Sessao, Treino } from '@/dominio/tipos';
+import { marcarEnvio, mesclarTreinos, pendentes, sessoesForaDaFila, type ItemFila } from './sincronizacao';
 
 const treino = (id: string, nome = 'Local'): Treino => ({
   id,
@@ -45,4 +45,12 @@ test('a fila sai em 201, soma tentativa na rede e para em 409', () => {
   expect(conflito[0]?.estado).toBe('conflito');
   expect(pendentes(conflito)).toEqual([]);
   expect(pendentes(marcarEnvio(conflito, { id: 's1', rede: true }))).toEqual([]);
+});
+
+test('o histórico que nunca entrou na fila entra como pendente, sem repetir o que já está nela', () => {
+  const sessao = (id: string) => ({ id }) as unknown as Sessao;
+  const novos = sessoesForaDaFila([sessao('s1'), sessao('s2'), sessao('s3')], [item('s1'), { ...item('s2'), estado: 'enviada' }]);
+  expect(novos.map((n) => n.id)).toEqual(['s3']);
+  expect(novos[0]).toMatchObject({ tipo: 'sessao', estado: 'pendente', tentativas: 0 });
+  expect(JSON.parse(novos[0].json)).toEqual({ id: 's3' });
 });

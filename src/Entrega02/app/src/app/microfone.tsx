@@ -34,6 +34,7 @@ export default function Microfone() {
     manterEmSegundoPlano: false,
     sinalSonoro: config.bips,
     monitorarNivel: true,
+    microfone: config.microfone,
     aoComando: (nome, texto, ativada) => {
       setComando({ nome, texto, ativada });
       setIgnorado(null);
@@ -108,7 +109,9 @@ export default function Microfone() {
           <Titulo tamanho={18}>Para ouvir melhor</Titulo>
           {[
             'Fale a uns 30 cm do microfone, sem cobrir a entrada com a mão.',
-            'Com fone de ouvido ou Bluetooth conectado, o celular usa o microfone do fone automaticamente.',
+            config.microfone === 'fone'
+              ? 'Com um fone Bluetooth conectado, o app ouve pelo microfone do fone. Para usar o do celular, troque em Configurações → Microfone.'
+              : 'O app está ouvindo pelo microfone do celular, mesmo com fone conectado. Para usar o do fone, troque em Configurações → Microfone.',
             'Com a tela apagada, o iPhone continua ouvindo. No Android, o sistema pode pausar o microfone: mantenha a tela ligada para garantir.',
             `Diga “${config.palavraAtivacao}” e o comando na mesma frase. Só “para”, “pare” ou “socorro” valem sem a palavra.`,
           ].map((t) => (

@@ -52,6 +52,10 @@ export class ReconhecedorNativo implements ReconhecedorDeFala {
   private religar: ReturnType<typeof setTimeout> | null = null;
   private ultimoInicio = 0;
   private recomecosSeguidos = 0;
+  // Cada início de escuta conta uma vez no recuo, mesmo que o sistema mande o
+  // 'error' e o 'end' da mesma escuta.
+  private inicios = 0;
+  private recomecoContado = -1;
 
   async pedirPermissao(): Promise<boolean> {
     const r = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
@@ -74,6 +78,7 @@ export class ReconhecedorNativo implements ReconhecedorDeFala {
   private comecar() {
     const noAparelho = this.modo === 'aparelho';
     this.ultimoInicio = Date.now();
+    this.inicios++;
     try {
       ExpoSpeechRecognitionModule.start({
         lang: 'pt-BR',
@@ -104,12 +109,17 @@ export class ReconhecedorNativo implements ReconhecedorDeFala {
   }
 
   // Se o sistema encerrou a escuta repetidamente, espera mais para não virar
-  // um laço de start/abort gastando bateria.
+  // um laço de start/abort gastando bateria. O teto é baixo (1,2 s): com o
+  // motor ligado o ruído encerra escutas curtas em sequência, e cada espera é
+  // um intervalo em que um "Nock, desliga" não é ouvido.
   private agendarRecomeco() {
     if (!this.ativo) return;
     if (this.religar) clearTimeout(this.religar);
-    const curto = Date.now() - this.ultimoInicio < 1200;
-    this.recomecosSeguidos = curto ? Math.min(this.recomecosSeguidos + 1, 5) : 0;
+    if (this.recomecoContado !== this.inicios) {
+      this.recomecoContado = this.inicios;
+      const curto = Date.now() - this.ultimoInicio < 1200;
+      this.recomecosSeguidos = curto ? Math.min(this.recomecosSeguidos + 1, 3) : 0;
+    }
     const atraso = 150 * 2 ** this.recomecosSeguidos;
     this.religar = setTimeout(() => {
       if (this.ativo) this.comecar();

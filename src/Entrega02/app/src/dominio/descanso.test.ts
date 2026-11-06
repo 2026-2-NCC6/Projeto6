@@ -1,4 +1,4 @@
-import { AVISO_MS, avisoComAntecedencia, decidirFimDoDescanso, novoAlvoDescanso, podeRetomarAutomaticamente, segundosRestantes, situacaoDescanso, TOLERANCIA_RETOMADA_MS } from './descanso';
+import { AVISO_MS, avisoComAntecedencia, avisoDeDescansoDevido, decidirFimDoDescanso, novoAlvoDescanso, podeRetomarAutomaticamente, segundosRestantes, situacaoDescanso, TOLERANCIA_RETOMADA_MS } from './descanso';
 
 test('só a série concluída pelas próprias bolas retoma sozinha', () => {
   expect(podeRetomarAutomaticamente('serie_concluida', true)).toBe(true);
@@ -47,4 +47,14 @@ test('segundos restantes arredondam para cima e param em zero', () => {
   expect(segundosRestantes(1_000, 0)).toBe(1);
   expect(segundosRestantes(1_200, 0)).toBe(2);
   expect(segundosRestantes(0, 1_000)).toBe(0);
+});
+
+test('"Faltam 10 segundos" só em descanso longo e longe da contagem', () => {
+  expect(avisoDeDescansoDevido(10_000, 30_000, false)).toBe(true);
+  expect(avisoDeDescansoDevido(10_001, 30_000, false)).toBe(false);
+  expect(avisoDeDescansoDevido(9_000, 30_000, true)).toBe(false); // já avisou
+  expect(avisoDeDescansoDevido(10_000, 15_000, false)).toBe(false); // descanso curto
+  // Perto da contagem de partida (app acordou tarde), a fala cobriria os bips.
+  expect(avisoDeDescansoDevido(AVISO_MS + 2_000, 30_000, false)).toBe(false);
+  expect(avisoDeDescansoDevido(3_000, 30_000, false)).toBe(false);
 });

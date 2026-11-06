@@ -1,4 +1,4 @@
-import type { Treino } from '@/dominio/tipos';
+import type { Sessao, Treino } from '@/dominio/tipos';
 
 export type EstadoFila = 'pendente' | 'enviada' | 'conflito';
 
@@ -45,4 +45,15 @@ export function marcarEnvio(fila: ItemFila[], resultado: ResultadoEnvio): ItemFi
 
 export function pendentes(fila: ItemFila[]): ItemFila[] {
   return fila.filter((item) => item.estado === 'pendente');
+}
+
+// Sessões gravadas neste aparelho que nunca entraram na fila: as de um build
+// sem a plataforma (EXPO_PUBLIC_API_URL vazio) ou de antes do login. Entram
+// como pendentes; o id da sessão é a chave de idempotência, então a API não
+// duplica uma que já tenha recebido.
+export function sessoesForaDaFila(sessoes: Sessao[], fila: ItemFila[]): ItemFila[] {
+  const naFila = new Set(fila.map((i) => i.id));
+  return sessoes
+    .filter((s) => !naFila.has(s.id))
+    .map((s) => ({ id: s.id, tipo: 'sessao' as const, json: JSON.stringify(s), tentativas: 0, estado: 'pendente' as const, ultimoErro: null }));
 }
