@@ -50,14 +50,14 @@
 
 ### Disciplina 5 — Inovação e Empreendedorismo
 
-| **Aluno(s) Responsável(veis)** | [preencher] |
+| **Aluno(s) Responsável(veis)** | André dos Santos Gregório |
 | :--- | :--- |
-| **Ferramenta utilizada** | [preencher] |
-| **Versão/modelo** | [preencher] |
-| **Disciplina / Trabalho** | [preencher] |
-| **Finalidade de uso** | [preencher] |
-| ***Prompts* principais utilizados** | [preencher] |
-| **Trechos ou entregas afetadas** | [preencher] |
+| **Ferramenta utilizada** | Claude (Claude Code) e Gemini (Google) |
+| **Versão/modelo** | Claude Sonet 5.5 e Gemini 3.1 Pro |
+| **Disciplina / Trabalho** | Inovação e Empreendedorismo - Entrega 1 |
+| **Finalidade de uso** | A finalidade da IA neste projeto foi apoiar a equipe na construção de uma análise de oportunidade consistente, rigorosa e totalmente fundamentada. Foi responsável por estruturar a narrativa empática do problema a partir das dores e frustrações identificadas nas pesquisas com os usuários, além de desenhar o racional de cálculo do TAM, definindo as premissas, as fontes de dados e o ticket médio em reais. Também foi responsavel por mapear o cenário concorrencial para evidenciar os nossos diferenciais frente às alternativas e soluções paliativas do mercado e, por fim, articular a redação executiva e o encadeamento lógico dos slides, garantindo que o material final ficasse claro, autossuficiente e pronto para a avaliação docente. |
+| ***Prompts* principais utilizados** | Preciso de apoio neste trabalho com o cálculo de TAM, premissas, fontes dos dados e ticket médio (anexo das instruções) |
+| **Trechos ou entregas afetadas** | Entrega 1 - Inovação e Empreendedorismo |
 
 ## Entrega 2
 
@@ -109,14 +109,20 @@
 
 ### Disciplina 5 — Inovação e Empreendedorismo
 
-| **Aluno(s) Responsável(veis)** | [preencher] |
+### Disciplina 5 — Inovação e Empreendedorismo
+
+| **Aluno(s) Responsável(veis)** | André dos Santos Gregório |
 | :--- | :--- |
-| **Ferramenta utilizada** | [preencher] |
-| **Versão/modelo** | [preencher] |
-| **Disciplina / Trabalho** | [preencher] |
-| **Finalidade de uso** | [preencher] |
-| ***Prompts* principais utilizados** | [preencher] |
-| **Trechos ou entregas afetadas** | [preencher] |
+| **Ferramenta utilizada** | Claude (Claude Code) e Gemini (Google) |
+| **Versão/modelo** | Claude Sonet 5.5 e Gemini 3.1 Pro |
+| **Disciplina / Trabalho** | Inovação e Empreendedorismo |
+| **Finalidade de uso** | A finalidade da IA neste projeto foi me apoiar no desenvolvimento da dimensão estratégica e econômica da startup, garantindo rigor conceitual e encadeamento lógico entre a análise setorial e a arquitetura do negócio. Estruturando a análise crítica das 5 Forças de Porter para avaliar o potencial de rentabilidade da indústria, desdobrando cada uma das nove dimensões do Business Model Canvas (BMC) de forma profundamente alinhada às dores e ao TAM validados na etapa anterior e formulando o racional das hipóteses de monetização e estrutura de custos.|
+| ***Prompts* principais utilizados** | Analise o anexo e me auxilie na construção desse projeto |
+| **Trechos ou entregas afetadas** | Entrega 2 - Inovação e Empreendedorismo |
+
+***Declaro que o uso acima descrito está em conformidade com o GUIA PARA O USO RESPONSÁVEL DE
+INTELIGÊNCIA ARTIFICIAL NA FECAP e que o conteúdo final é de minha plena responsabilidade
+autoral.***
 
 ***Declaro que o uso acima descrito está em conformidade com o GUIA PARA O USO RESPONSÁVEL DE
 INTELIGÊNCIA ARTIFICIAL NA FECAP e que o conteúdo final é de minha plena responsabilidade
