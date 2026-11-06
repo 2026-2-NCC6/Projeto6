@@ -21,12 +21,13 @@
   <img src="imagens/logo-nockhug.png" alt="Logo do NockHug: uma bola de tênis sorrindo que abraça a si mesma" width="240">
 </p>
 
-O **NockHug** é uma lançadora de bolas controlada **pela voz do praticante**, pelo celular. Quem treina com uma lançadora está em quadra, com a raquete na mão, e para pausar ou ajustar a máquina precisa largar o treino e atravessar a quadra. Com o NockHug, basta dizer a palavra de ativação seguida do comando: *"Nock, liga"*, *"Nock, pausa"*, *"Nock, retoma"*, *"desliga"*. A palavra de emergência *"Para!"* funciona a qualquer momento, sem palavra de ativação. No fim do descanso, a próxima série começa sozinha depois de três bips de aviso — a menos que o praticante diga *"Nock, desliga"* ou *"Nock, para"*.
+O **NockHug** é uma lançadora de bolas controlada **pela voz do praticante**, pelo celular. Quem treina com uma lançadora está em quadra, com a raquete na mão, e para pausar ou ajustar a máquina precisa largar o treino e atravessar a quadra. Com o NockHug, basta dizer a palavra de ativação seguida do comando: *"Nock, liga"*, *"Nock, pausa"*, *"Nock, retoma"*, *"desliga"*. A palavra de emergência *"Para!"* funciona a qualquer momento, sem palavra de ativação. No fim do descanso, a próxima série começa sozinha depois de cinco bips de aviso — a menos que o praticante diga *"Nock, desliga"* ou *"Nock, para"*.
 
-O projeto é parte do tema **Smart Tennis Arena** (treinos gamificados de tênis com IoT, robótica e integração), em parceria com a Smart Tennis. Ele tem duas partes:
+O projeto é parte do tema **Smart Tennis Arena** (treinos gamificados de tênis com IoT, robótica e integração), em parceria com a Smart Tennis. Ele tem três partes:
 
 - **A lançadora**: um ESP32 que comanda dois motores, a roda que arremessa a bola (14 000 RPM) e a base giratória que alimenta o cano (20 RPM). Ela recebe comandos por **Wi-Fi** (Access Point próprio) ou **Bluetooth Low Energy**, e para os motores sozinha se ficar 4 segundos sem notícias do app.
-- **O app mobile** (Android e iOS): prepara cada sessão com um checklist de segurança, reconhece a voz, conta as bolas estimadas de cada série, mantém um botão de parada de emergência sempre à mão e transforma cada treino em progresso visível (XP, níveis, sequência de dias e conquistas). Cada treino tem a própria velocidade dos motores (Forte, Médio, Fraco ou Personalizado), definida na primeira sessão e editável num sheet; o descanso pode ser ajustado na própria sessão e retoma sozinho com aviso sonoro. Funciona sem internet e guarda tudo no próprio aparelho.
+- **O app mobile** (Android e iOS): prepara cada sessão com um checklist de segurança, reconhece a voz, conta as bolas estimadas de cada série, mantém um botão de parada de emergência sempre à mão e transforma cada treino em progresso visível (XP, níveis, sequência de dias e conquistas). Cada treino tem a própria velocidade dos motores (Forte, Médio, Fraco ou Personalizado), definida na primeira sessão e editável num sheet; o descanso pode ser ajustado na própria sessão e retoma sozinho com aviso sonoro. Na quadra, funciona sem internet e guarda tudo no próprio aparelho.
+- **A plataforma mãe** (site, API e banco): o autor cria e publica treinos no site; o app baixa o catálogo quando tem internet e envia as sessões encerradas, que ficam disponíveis para consulta no site.
 
 A segurança vem antes de tudo: a lançadora só aceita "liga" depois que o checklist a **arma**, e parar é sempre mais fácil que ligar.
 
@@ -34,16 +35,22 @@ A segurança vem antes de tudo: a lançadora só aceita "liga" depois que o chec
 
 | Unidade curricular | Entrega 01 | Entrega 02 |
 |--------------------|------------|------------|
-| Projeto Interdisciplinar: IoT e Robótica | [Proposta técnica e backlog](documentos/Entrega01/PI_IoT_Robotica/Entrega01_PI_IoT_Robotica.pdf) | [Em andamento](documentos/Entrega02/PI_IoT_Robotica) |
+| Projeto Interdisciplinar: IoT e Robótica | [Proposta técnica e backlog](documentos/Entrega01/PI_IoT_Robotica/Entrega01_PI_IoT_Robotica.pdf) | [Implementação final](documentos/Entrega02/PI_IoT_Robotica/Entrega02_PI_IoT_Robotica.pdf) |
 | Sistemas Embarcados e Robótica | [Montagem e testes do circuito](documentos/Entrega01/Sistemas_Embarcados_Robotica/Entrega01_Sistemas_Embarcados_Robotica.pdf) | [Relatório e vídeo do protótipo](documentos/Entrega02/Sistemas_Embarcados_Robotica/README.md) |
-| Teoria da Computação e Linguagens Formais | [Modelagem formal do controle por voz](documentos/Entrega01/Teoria_Computacao/Entrega01_Teoria_da_Computa%C3%A7%C3%A3o.pdf) | [Em andamento](documentos/Entrega02/Teoria_Computacao) |
-| Redes de Computadores e Cibersegurança | [Relatório de vulnerabilidades](documentos/Entrega01/Redes_Ciberseguranca/Entrega01_Redes_Ciberseguranca.pdf) | [Em andamento](documentos/Entrega02/Redes_Ciberseguranca) |
-| Inovação e Empreendedorismo | [Análise da oportunidade](documentos/Entrega01/Inovacao_Empreendedorismo/Entrega01_Inova%C3%A7%C3%A3o_Empreendedorismo.pdf) | [Em andamento](documentos/Entrega02/Inovacao_Empreendedorismo) |
+| Teoria da Computação e Linguagens Formais | [Modelagem formal do controle por voz](documentos/Entrega01/Teoria_Computacao/Entrega01_Teoria_da_Computa%C3%A7%C3%A3o.pdf) | [Regras de funcionamento e modelo formal](documentos/Entrega02/Teoria_Computacao/Entrega02_Teoria_da_Computa%C3%A7%C3%A3o.pdf) |
+| Redes de Computadores e Cibersegurança | [Relatório de vulnerabilidades](documentos/Entrega01/Redes_Ciberseguranca/Entrega01_Redes_Ciberseguranca.pdf) | [Plano de resposta aos riscos](documentos/Entrega02/Redes_Ciberseguranca/Entrega02_Ciber_Plano_Resposta.pdf) e [relatório de auditoria de segurança](documentos/Entrega02/Redes_Ciberseguranca/Entrega02_Ciber_Security_Audit_Report.pdf) |
+| Inovação e Empreendedorismo | [Análise da oportunidade](documentos/Entrega01/Inovacao_Empreendedorismo/Entrega01_Inova%C3%A7%C3%A3o_Empreendedorismo.pdf) | 5 Forças de Porter e Business Model Canvas — aguardando envio |
+
+Outros documentos:
+
+- [Banner da Semana FECAP de Tecnologia](documentos/Banner_FECAP_CCOMP6_NockHug.pdf)
+- [Documento do Projeto de Extensão](documentos/Projeto_Extens%C3%A3o_NockHug.pdf)
+- Declaração de Uso de IA: [por disciplina](documentos/README.md) e [por módulo do código](src/README.md)
 
 Código-fonte por entrega:
 
 - [**Entrega 01**](src/Entrega01): firmware do ESP32 com controle por voz no navegador, senha forte no Access Point e token exigido para acionar os motores.
-- [**Entrega 02**](src/Entrega02): firmware v2.2 (máquina de estados com trava, Wi-Fi e Bluetooth ao mesmo tempo, watchdog, calibração e diagnóstico de recusa) e o app mobile (velocidade por treino, retomada do descanso, edição de treinos, voz com a tela apagada no iOS). O passo a passo detalhado está no [README da Entrega 02](src/Entrega02/README.md).
+- [**Entrega 02**](src/Entrega02): firmware v2.4 (máquina de estados com trava, Wi-Fi e Bluetooth ao mesmo tempo, watchdog, calibração, diagnóstico de recusa e limite de comandos por segundo), o app mobile (velocidade por treino, retomada do descanso, edição de treinos, voz com a tela apagada) e a plataforma mãe (site e API para publicar treinos e consultar sessões). O passo a passo detalhado está no [README da Entrega 02](src/Entrega02/README.md) e no [README da plataforma](src/Entrega02/plataforma/README.md).
 
 ## 🛠 Estrutura de pastas
 
@@ -51,18 +58,27 @@ Código-fonte por entrega:
 Projeto6/
 ├── README.md
 ├── documentos/                  entregas em PDF, por entrega e por unidade curricular
+│   ├── README.md                declaração de uso de IA por disciplina
 │   ├── Entrega01/
-│   └── Entrega02/
+│   ├── Entrega02/
+│   ├── Banner_FECAP_CCOMP6_NockHug.pdf
+│   └── Projeto_Extensão_NockHug.pdf
 ├── imagens/                     imagens do projeto (logo)
 └── src/
+    ├── README.md                declaração de uso de IA por módulo do sistema
     ├── Entrega01/
     │   ├── main.ino             firmware da Entrega 01
     │   └── segredos.exemplo.h   modelo das credenciais da lançadora
     └── Entrega02/
         ├── README.md            como gravar o firmware, contrato HTTP/BLE e roteiro de testes
-        ├── main.ino             firmware v2
+        ├── main.ino             firmware v2 (2.4.0)
         ├── segredos.exemplo.h   modelo das credenciais da lançadora
-        └── app/                 app mobile (React Native + Expo)
+        ├── app/                 app mobile (React Native + Expo)
+        └── plataforma/          plataforma mãe
+            ├── api/             API REST (Node + TypeScript, OpenAPI, Azure SQL)
+            ├── site/            site do autor (React + Vite)
+            ├── e2e/             testes de aceite ponta a ponta (Playwright)
+            └── infra/           infraestrutura na Azure (Bicep)
 ```
 
 Estrutura do app mobile:
@@ -96,11 +112,26 @@ app/
 1. Copie `segredos.exemplo.h` para `segredos.h`, na mesma pasta do `main.ino`, e defina a senha do Access Point e o token. O `segredos.h` não vai para o repositório.
 2. Abra o `main.ino` na Arduino IDE com a placa **ESP32 Dev Module**.
 3. O firmware v2 usa Wi-Fi e Bluetooth ao mesmo tempo e não cabe na partição padrão: em **Ferramentas → Partition Scheme**, escolha **Huge APP (3MB No OTA/1MB SPIFFS)**.
-4. Grave na placa. A lançadora cria a rede `ESP32_Voz_Direta` e responde em `http://192.168.4.1`.
+4. Grave na placa. A lançadora do firmware v2 cria a rede `Quadra-Local` (a da Entrega 01 se chama `ESP32_Voz_Direta`) e responde em `http://192.168.4.1`.
 
 ### App mobile
 
 O app ainda não é distribuído pelas lojas. Para instalar, gere o app a partir do código (próxima seção). Para conhecer o app sem a lançadora, use **Conectar → Simulada**: uma lançadora de software com as mesmas regras, sem acionar motor nenhum.
+
+### Plataforma mãe (site e API)
+
+Com Node.js instalado, a API sobe localmente sem banco (os dados ficam em memória):
+
+```sh
+cd src/Entrega02/plataforma/api
+cp .env.example .env      # preencha JWT_SECRET e as senhas semente
+npm install && npm run dev                                   # http://127.0.0.1:3099
+
+cd ../site
+npm install && VITE_API_URL=http://127.0.0.1:3099 npm run dev   # http://127.0.0.1:5173
+```
+
+Para o app conversar com a plataforma, defina `EXPO_PUBLIC_API_URL` com o mesmo endereço (sem `/v1`). Banco Azure SQL, implantação e testes ponta a ponta estão no [README da plataforma](src/Entrega02/plataforma/README.md).
 
 ## 💻 Configuração para Desenvolvimento
 
@@ -130,7 +161,7 @@ npm run lint
 
 ## 📋 Licença
 
-NockHug © 2026 by André Gregório dos Santos, Guilherme Reis Fogolin de Godoy, Pedro Henrique Nascimento Lemos, Yan Cezareto Ramos is licensed under CC BY-NC-ND 4.0
+NockHug © 2026 by André dos Santos Gregório, Guilherme Reis Fogolin de Godoy, Pedro Henrique Nascimento Lemos, Yan Ramos Cezareto is licensed under CC BY-NC-ND 4.0
 
 ## 🎓 Referências
 
