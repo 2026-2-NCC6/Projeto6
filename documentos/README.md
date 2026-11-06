@@ -109,8 +109,6 @@
 
 ### Disciplina 5 — Inovação e Empreendedorismo
 
-### Disciplina 5 — Inovação e Empreendedorismo
-
 | **Aluno(s) Responsável(veis)** | André dos Santos Gregório |
 | :--- | :--- |
 | **Ferramenta utilizada** | Claude (Claude Code) e Gemini (Google) |
